@@ -12,7 +12,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # Токен бота
-TOKEN = "8508761925:AAGMzdBFXO9qHYsCl6tBUSB9BPgFlSYzVfA"
+TOKEN = " "
 
 # Настройка сессии с повторными попытками
 def create_session_with_retries():
