@@ -1,6 +1,7 @@
 import io
 import os
 import time
+time.sleep(5)
 import threading
 from datetime import datetime, timedelta
 
@@ -16,12 +17,12 @@ from telebot import types
 from urllib3.util.retry import Retry
 
 
-TOKEN = "PASTE_NEW_TELEGRAM_BOT_TOKEN_HERE"
+TOKEN = "YOUR_TOKEN"
 ADMIN_ID = 1376134977
 
 SQL_SERVER_CONFIG = {
     "driver": "{ODBC Driver 18 for SQL Server}",
-    "server": r"localhost\SQLEXPRESS",   # замени на свой сервер
+    "server": r"localhost\SQLEXPRESS", 
     "database": "FinanceBotDB",
     "trusted_connection": "yes",
 }
