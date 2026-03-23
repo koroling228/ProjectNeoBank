@@ -1796,12 +1796,6 @@ def main(page: ft.Page):
                         on_click=fill_demo_account,
                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=14)),
                     ),
-                    ft.Text(
-                        "Для демонстрации: demo@example.com / DemoPass1!",
-                        size=12,
-                        color=ui_color("muted"),
-                        text_align=ft.TextAlign.CENTER,
-                    ),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=10,
