@@ -209,7 +209,7 @@ def user_get_settings(user_id: str) -> Dict[str, str]:
     c.execute("SELECT settings FROM users WHERE id = ?", (user_id,))
     row = c.fetchone()
     raw = row[0] if row and row[0] else "{}"
-    defaults = {"theme": "light", "language": "Русский"}
+    defaults = {"theme": "light", "language": "Русский", "sound": "on"}
 
     try:
         import json
@@ -1227,6 +1227,48 @@ def main(page: ft.Page):
         theme = settings.get("theme", "light")
         page.theme_mode = ft.ThemeMode.DARK if theme == "dark" else ft.ThemeMode.LIGHT
 
+    def is_sound_enabled() -> bool:
+        u = state.get("user")
+        if not u:
+            return True
+        settings = user_get_settings(u["id"])
+        return settings.get("sound", "on") != "off"
+
+    def apply_sound_button_state(button):
+        if not button:
+            return
+        muted = not is_sound_enabled()
+        button.icon = ft.Icons.VOLUME_OFF if muted else ft.Icons.VOLUME_UP
+        button.tooltip = "Включить звук" if muted else "Выключить звук"
+
+    def toggle_sound(e=None):
+        u = state.get("user")
+        if not u:
+            toast("Сначала войдите")
+            return
+
+        enabled = is_sound_enabled()
+        new_value = "off" if enabled else "on"
+        user_save_settings(u["id"], {"sound": new_value})
+        state["user"] = user_get_by_email(u["email"])
+
+        if e is not None and getattr(e, "control", None) is not None:
+            apply_sound_button_state(e.control)
+
+        if nav.selected_index == 0:
+            main_container.content = build_home_view()
+        page.update()
+        toast("Звук выключен" if new_value == "off" else "Звук включён")
+
+    def build_sound_icon_button():
+        button = ft.IconButton(
+            icon=ft.Icons.VOLUME_UP,
+            icon_size=24,
+            on_click=toggle_sound,
+        )
+        apply_sound_button_state(button)
+        return button
+
     def refresh_profile_view():
         u = state["user"]
         if not u:
@@ -1513,6 +1555,7 @@ def main(page: ft.Page):
                 {
                     "theme": "light",
                     "language": "Русский",
+                    "sound": "on",
                 },
             )
             user_update_balance(u["id"], 0.0)
@@ -2793,12 +2836,7 @@ def main(page: ft.Page):
                     ],
                     spacing=0,
                 ),
-                ft.Container(
-                    content=ft.Icon(ft.Icons.NOTIFICATIONS_NONE),
-                    padding=10,
-                    border_radius=14,
-                    bgcolor=ft.Colors.GREY_100,
-                ),
+                build_sound_icon_button(),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
