@@ -112,8 +112,13 @@ def validate_email(email: str) -> Tuple[bool, str]:
 
 def validate_phone(phone: str) -> Tuple[bool, str]:
     phone = (phone or "").strip()
-    if phone and not re.fullmatch(r"[\d\+\-\(\)\s]{6,20}", phone):
-        return False, "Телефон указан в неверном формате"
+
+    if not phone:
+        return False, "Введите номер телефона."
+
+    if not re.fullmatch(r"^\+7\d{10}$", phone):
+        return False, "Телефон должен быть в формате +7XXXXXXXXXX"
+
     return True, ""
 
 
@@ -1291,7 +1296,17 @@ def main(page: ft.Page):
         prefix_icon=ft.Icons.EMAIL_OUTLINED,
         keyboard_type=ft.KeyboardType.EMAIL,
     )
-    reg_phone_tf = ft.TextField(label="Телефон", width=320, prefix_icon=ft.Icons.PHONE_OUTLINED)
+    reg_phone_tf = ft.TextField(
+        label="Телефон",
+        width=320,
+        prefix_icon=ft.Icons.PHONE_OUTLINED,
+        hint_text="+7XXXXXXXXXX",
+        max_length=12,
+        input_filter=ft.InputFilter(
+        allow=True,
+        regex_string=r"^\+?\d{0,11}$",
+        replacement_string=""),
+    )
     reg_pwd_tf = ft.TextField(
         label="Пароль",
         password=True,
