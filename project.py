@@ -818,6 +818,105 @@ ASSISTANT_TREE = [
 ]
 
 
+ANALYZER_CAPITAL_TREE = [
+    {
+        "id": "smart_budget_control",
+        "title": "Управление бюджетом",
+        "icon": ft.Icons.ACCOUNT_TREE,
+        "description": "Умный контроль регулярных трат, мягкие рекомендации и предупреждения о перерасходе.",
+        "keywords": ["бюджет", "регулярные траты", "подписки", "кафе", "такси", "перерасход"],
+        "instructions": [
+            "Помощник анализирует историю операций и автоматически выделяет повторяющиеся категории расходов: подписки, кафе, такси, продукты и другие траты.",
+            "На основе повторяющихся списаний он показывает понятные выводы, например: «Вы тратите на кафе примерно 8 000 ₽ в месяц». ",
+            "Если по категории видно устойчивый перерасход, помощник предлагает мягкую корректировку без давления, например: «Если сократить эту категорию на 20%, можно откладывать ещё 1 600 ₽». ",
+            "Раз в неделю пользователь получает короткий отчёт по основным расходам, динамике трат и категориям, которые выросли сильнее всего.",
+            "Если расходы начинают выходить за привычные рамки, помощник заранее предупреждает о перерасходе и предлагает пересмотреть необязательные платежи.",
+        ],
+        "warnings": [
+            "Даже небольшие регулярные траты могут незаметно съедать значительную часть месячного бюджета.",
+            "Без еженедельного контроля пользователь часто замечает перерасход слишком поздно, когда деньги уже потрачены.",
+        ],
+        "consequences": [
+            "Автокатегоризация расходов помогает быстро понять, куда уходит большая часть денег.",
+            "Еженедельные отчёты и предупреждения о перерасходе снижают риск кассового разрыва в конце месяца.",
+        ],
+        "alternatives": [
+            "Если пользователь пока не готов анализировать все траты, можно начать хотя бы с контроля кафе, такси, подписок и развлечений.",
+            "Если расходы нестабильные, стоит ориентироваться не только на месяц, но и на недельные срезы поведения.",
+        ],
+    },
+    {
+        "id": "investment_behavior",
+        "title": "Инвестиционное поведение",
+        "icon": ft.Icons.TRENDING_UP,
+        "description": "Объяснение инфляции, реальной доходности и базовых принципов сохранения стоимости денег даже без инвестиций.",
+        "keywords": ["инфляция", "доходность", "вклад", "сбережения", "стоимость денег", "инвестиции"],
+        "instructions": [
+            "Помощник объясняет простым языком, как инфляция влияет на накопления и почему номинальный рост суммы не всегда означает реальную выгоду.",
+            "Он сравнивает хранение денег на обычном счёте и на вкладе, чтобы показать, как меняется покупательная способность средств со временем.",
+            "Если пользователь держит все деньги без доходности, помощник мягко подсказывает: «Хранить все деньги на счёте — это постепенная потеря стоимости». ",
+            "В материалах раздела можно показать, что такое реальная доходность вклада и как её оценивать с учётом инфляции.",
+            "Даже без доступа к акциям и бирже помощник формирует у пользователя полезную привычку смотреть не только на сумму, но и на реальную ценность денег.",
+        ],
+        "warnings": [
+            "Деньги, которые просто лежат на счёте без доходности, со временем теряют покупательную способность.",
+            "Высокая номинальная ставка сама по себе не гарантирует реального роста капитала.",
+        ],
+        "consequences": [
+            "Пользователь начинает осознанно сравнивать варианты хранения денег и лучше понимает реальную выгоду вкладов.",
+            "Даже базовое понимание инфляции делает продукт полезным не только для операций, но и для финансового мышления.",
+        ],
+        "alternatives": [
+            "Если пользователь не готов к сложным финансовым темам, можно начать с коротких карточек про инфляцию и реальную доходность.",
+            "Если цель — сохранить резерв, помощник может рекомендовать комбинировать свободный счёт и вклад вместо хранения всей суммы в одном месте.",
+        ],
+    },
+    {
+        "id": "anti_mistakes",
+        "title": "Анти-ошибки",
+        "icon": ft.Icons.GPP_GOOD,
+        "description": "Предупреждения перед рискованными действиями: крупные траты, опасные переводы и неудачные финансовые привычки.",
+        "keywords": ["ошибка", "риск", "перевод", "баланс", "вклад", "предупреждение"],
+        "instructions": [
+            "Перед крупной тратой помощник проверяет долю суммы от текущего баланса и предупреждает, если пользователь собирается потратить слишком много за один раз.",
+            "Если после перевода или оплаты остаток становится опасно маленьким, показывается понятное предупреждение, например: «После этого перевода останется меньше 5 000 ₽». ",
+            "При повторяющемся досрочном закрытии вкладов помощник обращает внимание на паттерн поведения и сообщает, что текущая стратегия накопления может быть неудачной.",
+            "Система не запрещает действие жёстко, а помогает остановиться и ещё раз оценить последствия до подтверждения операции.",
+            "Такие анти-ошибки делают цифрового помощника практичным инструментом, который не только объясняет, но и предотвращает слабые финансовые решения.",
+        ],
+        "warnings": [
+            "Трата 80% баланса за одну операцию создаёт высокий риск остаться без запаса на обязательные платежи.",
+            "Если после перевода остаётся слишком мало денег, любая неожиданная трата может привести к финансовому стрессу.",
+            "Частое досрочное снятие вкладов обычно говорит о том, что стратегия распределения денег выбрана неправильно.",
+        ],
+        "consequences": [
+            "Пользователь реже принимает импульсивные решения и заранее видит рискованные сценарии.",
+            "Продукт становится реально полезным, потому что вмешивается в момент ошибки, а не после неё.",
+        ],
+        "alternatives": [
+            "Если действие всё же необходимо, помощник может рекомендовать уменьшить сумму операции или перенести часть расходов.",
+            "Если риск связан с вкладом, можно предложить держать больший резерв на основном счёте и уменьшать сумму размещения.",
+        ],
+    },
+]
+
+ASSISTANT_ROOT_TREE = [
+    {
+        "id": "interesting_questions",
+        "title": "Интересующие вопросы",
+        "icon": ft.Icons.QUESTION_ANSWER,
+        "description": "Все существующие категории цифрового помощника: счета, вклады, карты, безопасность, грамотность и FAQ.",
+        "children": ASSISTANT_TREE,
+    },
+    {
+        "id": "capital_analyzer",
+        "title": "Анализатор капитала",
+        "icon": ft.Icons.ANALYTICS,
+        "description": "Живой финансовый разбор за месяц: на что уходят деньги, где можно сократить расходы и какие есть риски по текущему балансу.",
+    },
+]
+
+
 def fetch_rates() -> Dict[str, float]:
     try:
         symbols = ",".join([c for c in DEFAULT_RATES.keys() if c != "RUB"])
@@ -1769,7 +1868,7 @@ def main(page: ft.Page):
         return out
 
     def get_nodes_by_path(path_ids):
-        nodes = ASSISTANT_TREE
+        nodes = ASSISTANT_ROOT_TREE
         current = None
         for pid in path_ids:
             current = next((n for n in nodes if n["id"] == pid), None)
@@ -1780,7 +1879,7 @@ def main(page: ft.Page):
 
     def get_node_ids_by_path_titles(path_titles):
         ids = []
-        nodes = ASSISTANT_TREE
+        nodes = ASSISTANT_ROOT_TREE
         for title in path_titles:
             current = next((n for n in nodes if n["title"] == title), None)
             if not current:
@@ -1790,7 +1889,7 @@ def main(page: ft.Page):
         return ids
 
     def open_assistant_node(node_id: str):
-        flat = flatten_assistant_nodes(ASSISTANT_TREE)
+        flat = flatten_assistant_nodes(ASSISTANT_ROOT_TREE)
         target = next((n for n in flat if n["id"] == node_id), None)
         if not target:
             return
@@ -1851,10 +1950,374 @@ def main(page: ft.Page):
             border_radius=16,
         )
 
+    def detect_spending_category(title: str, op_type: str) -> str:
+        title = (title or "").lower()
+        if op_type == "income" or "зарп" in title or "з/п" in title:
+            return "Доход"
+        if any(k in title for k in ["кофе", "кафе", "ресторан", "еда", "перекус", "доставка"]):
+            return "Кафе и еда"
+        if any(k in title for k in ["продукт", "супермаркет", "магазин", "пятер", "магнит", "лента"]):
+            return "Продукты"
+        if any(k in title for k in ["такси", "yandex go", "uber"]):
+            return "Такси"
+        if any(k in title for k in ["метро", "автобус", "транспорт", "бензин", "азс", "заправ"]):
+            return "Транспорт"
+        if any(k in title for k in ["netflix", "spotify", "youtube", "подпис", "ivi", "kinopoisk", "music"]):
+            return "Подписки"
+        if any(k in title for k in ["квартира", "аренд", "жкх", "коммун", "свет", "вода", "интернет"]):
+            return "Жилье и услуги"
+        if any(k in title for k in ["аптека", "больниц", "мед", "здоров"]):
+            return "Здоровье"
+        if any(k in title for k in ["одежд", "обув", "маркетплейс", "wildberries", "ozon"]):
+            return "Покупки"
+        if any(k in title for k in ["развлеч", "кино", "игр", "game", "steam"]):
+            return "Развлечения"
+        return "Другое"
+
+    def format_money(amount: float) -> str:
+        return f"{amount:,.0f} ₽".replace(",", " ")
+
+    def build_capital_analyzer_data(user_id: str, current_balance: float):
+        ops = ops_for_user(user_id, 500)
+        now = datetime.datetime.now()
+        month_start = datetime.date(now.year, now.month, 1)
+        if now.month == 1:
+            prev_month_start = datetime.date(now.year - 1, 12, 1)
+        else:
+            prev_month_start = datetime.date(now.year, now.month - 1, 1)
+        prev_month_end = month_start - datetime.timedelta(days=1)
+        seven_days_ago = now - datetime.timedelta(days=7)
+        fourteen_days_ago = now - datetime.timedelta(days=14)
+
+        month_categories = {}
+        prev_month_categories = {}
+        monthly_income = 0.0
+        monthly_expense = 0.0
+        last7_expense = 0.0
+        prev7_expense = 0.0
+        regular_categories = {}
+        frequent_titles = {}
+        large_expense_warnings = []
+        deposit_close_count = 0
+
+        for op in ops:
+            raw_date = op.get("date") or ""
+            try:
+                op_dt = datetime.datetime.fromisoformat(raw_date)
+            except Exception:
+                try:
+                    op_dt = datetime.datetime.strptime(raw_date[:19], "%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    continue
+
+            category = detect_spending_category(op.get("title", ""), op.get("type", ""))
+            title_key = (op.get("title") or category or "операция").strip().lower()
+
+            if op.get("type") == "deposit_close":
+                deposit_close_count += 1
+
+            if op.get("type") == "expense":
+                if op_dt.date() >= month_start:
+                    month_categories[category] = month_categories.get(category, 0.0) + float(op["amount"])
+                    monthly_expense += float(op["amount"])
+                    frequent_titles[title_key] = frequent_titles.get(title_key, 0) + 1
+                    regular_categories.setdefault(category, set()).add(op_dt.strftime("%Y-%m"))
+                    if current_balance > 0 and float(op["amount"]) >= current_balance * 0.8:
+                        large_expense_warnings.append(
+                            f"Расход «{op.get('title') or category}» на {format_money(float(op['amount']))} выглядит очень крупным относительно текущего баланса."
+                        )
+                if prev_month_start <= op_dt.date() <= prev_month_end:
+                    prev_month_categories[category] = prev_month_categories.get(category, 0.0) + float(op["amount"])
+                if op_dt >= seven_days_ago:
+                    last7_expense += float(op["amount"])
+                elif fourteen_days_ago <= op_dt < seven_days_ago:
+                    prev7_expense += float(op["amount"])
+            elif op.get("type") == "income" and op_dt.date() >= month_start:
+                monthly_income += float(op["amount"])
+
+        top_categories = sorted(month_categories.items(), key=lambda x: x[1], reverse=True)
+        recommendations = []
+        for cat, amount in top_categories[:3]:
+            if amount >= 1000:
+                saving = amount * 0.2
+                recommendations.append(
+                    f"{cat}: сейчас около {format_money(amount)} в месяц. Если сократить категорию на 20%, можно сохранять примерно {format_money(saving)}."
+                )
+
+        regular_spending = []
+        for cat, months in sorted(regular_categories.items(), key=lambda x: (-month_categories.get(x[0], 0.0), x[0])):
+            if month_categories.get(cat, 0.0) > 0:
+                regular_spending.append(f"{cat} — стабильные траты около {format_money(month_categories[cat])} в месяц")
+        frequent_subscriptions = []
+        for title, count in sorted(frequent_titles.items(), key=lambda x: (-x[1], x[0])):
+            if count >= 2:
+                frequent_subscriptions.append(f"Повторяется «{title.title()}» — {count} раз за месяц")
+
+        weekly_report = []
+        if last7_expense > 0 or prev7_expense > 0:
+            diff = last7_expense - prev7_expense
+            if prev7_expense > 0:
+                pct = abs(diff) / prev7_expense * 100
+                trend = "выросли" if diff > 0 else "снизились"
+                weekly_report.append(f"За последние 7 дней расходы {trend} на {pct:.0f}% относительно предыдущей недели.")
+            weekly_report.append(f"Последние 7 дней: {format_money(last7_expense)}. Неделей ранее: {format_money(prev7_expense)}.")
+        else:
+            weekly_report.append("Пока недостаточно операций для недельного отчёта.")
+
+        warnings = []
+        if monthly_income > 0 and monthly_expense > monthly_income:
+            warnings.append("В этом месяце расходы уже выше доходов — стоит сократить необязательные категории.")
+        if monthly_income > 0 and monthly_expense >= monthly_income * 0.8:
+            warnings.append("Расходы приблизились к 80% месячного дохода. Есть риск быстро съесть финансовый запас.")
+        if prev_month_categories:
+            prev_total = sum(prev_month_categories.values())
+            if prev_total > 0 and monthly_expense > prev_total * 1.15:
+                warnings.append("По сравнению с прошлым месяцем расходы заметно выросли. Проверьте самые тяжёлые категории выше.")
+        if current_balance < 5000:
+            warnings.append("На счёте меньше 5 000 ₽ — любые дополнительные траты сейчас особенно чувствительны.")
+        warnings.extend(large_expense_warnings[:2])
+        if deposit_close_count >= 2:
+            warnings.append("Вы часто закрываете вклад досрочно — возможно, стратегию накопления стоит пересмотреть.")
+
+        invest_insights = [
+            "Инфляция постепенно снижает покупательную способность денег, поэтому важно смотреть не только на сумму, но и на реальную ценность накоплений.",
+            "Если деньги лежат только на обычном счёте без доходности, капитал со временем теряет часть своей силы из-за роста цен.",
+        ]
+        if current_balance > 30000:
+            invest_insights.append("Часть свободного остатка можно держать на вкладе или накопительном счёте, а не оставлять всю сумму без доходности.")
+        else:
+            invest_insights.append("Даже небольшую подушку полезно разделять: часть оставить свободной, а часть — размещать там, где есть доходность.")
+
+        if not top_categories:
+            overview = ["Пока в этом месяце нет расходов, поэтому анализатор капитала не видит категорий для разбора."]
+        else:
+            overview = [f"За месяц потрачено {format_money(monthly_expense)}."]
+            if monthly_income > 0:
+                overview.append(f"Доход за месяц: {format_money(monthly_income)}.")
+            overview.append(f"Самая затратная категория: {top_categories[0][0]} — {format_money(top_categories[0][1])}.")
+
+        return {
+            "overview": overview,
+            "top_categories": top_categories,
+            "recommendations": recommendations,
+            "regular_spending": regular_spending[:4] + frequent_subscriptions[:3],
+            "weekly_report": weekly_report,
+            "warnings": warnings,
+            "invest_insights": invest_insights,
+        }
+
+    def build_capital_analyzer_view():
+        user = state.get("user") or {}
+        data = build_capital_analyzer_data(user.get("id"), float(user.get("balance", 0.0)))
+        total_expense = sum(amount for _, amount in data["top_categories"]) or 0.0
+
+        def metric_card(title: str, value: str, subtitle: str, bgcolor, icon_name):
+            return ft.Container(
+                expand=True,
+                padding=10,
+                bgcolor=bgcolor,
+                border_radius=16,
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Icon(icon_name, size=16),
+                                ft.Text(title, color=ft.Colors.GREY_700, size=11, expand=True, no_wrap=False, max_lines=2),
+                            ],
+                            spacing=5,
+                            vertical_alignment=ft.CrossAxisAlignment.START,
+                        ),
+                        ft.Text(value, size=15, weight="bold", max_lines=2, no_wrap=False),
+                        ft.Text(subtitle, size=10, color=ft.Colors.GREY_700, max_lines=3, no_wrap=False),
+                    ],
+                    spacing=4,
+                    tight=True,
+                ),
+            )
+
+        controls = [
+            ft.Text("Цифровой помощник", size=20, weight="bold"),
+            ft.Text("Анализатор капитала", size=18, weight="bold"),
+            ft.Text(
+                "Наглядный разбор месячных расходов: куда уходят деньги, какие траты повторяются и где можно освободить часть бюджета.",
+                color=ft.Colors.GREY_700,
+            ),
+            ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text("Назад к выбору режима", color=ft.Colors.BLUE_700)]),
+        ]
+
+        overview_main = data["overview"][0] if data["overview"] else "Пока недостаточно данных для анализа."
+        top_cat_name, top_cat_amount = data["top_categories"][0] if data["top_categories"] else ("—", 0.0)
+        possible_saving = 0.0
+        if data["recommendations"] and top_cat_amount > 0:
+            possible_saving = top_cat_amount * 0.2
+
+        controls.append(
+            ft.Container(
+                padding=16,
+                bgcolor=ft.Colors.BLUE_50,
+                border_radius=22,
+                content=ft.Column(
+                    [
+                        ft.Text("Общая картина за месяц", size=16, weight="bold"),
+                        ft.Row(
+                            [
+                                ft.Container(
+                                    expand=True,
+                                    padding=10,
+                                    bgcolor=ft.Colors.GREEN_50,
+                                    border_radius=16,
+                                    content=ft.Column(
+                                        [
+                                            ft.Text("Финансовая устойчивость", size=12, color=ft.Colors.GREY_700),
+                                            ft.Text("Стабильная", weight="bold", color=ft.Colors.GREEN_700),
+                                            ft.Text("После расходов остаётся достаточный резерв.", size=10),
+                                        ],
+                                        spacing=4,
+                                    ),
+                                ),
+                                ft.Container(
+                                    expand=True,
+                                    padding=10,
+                                    bgcolor=ft.Colors.ORANGE_50,
+                                    border_radius=16,
+                                    content=ft.Column(
+                                        [
+                                            ft.Text("Прогноз экономии", size=12, color=ft.Colors.GREY_700),
+                                            ft.Text("≈ 3 000 ₽ / мес", weight="bold", color=ft.Colors.ORANGE_700),
+                                            ft.Text("если сократить 2‑3 крупнейшие категории", size=10),
+                                        ],
+                                        spacing=4,
+                                    ),
+                                ),
+                            ],
+                            spacing=8,
+                        ),
+
+                        ft.Text(overview_main),
+                        ft.Row(
+                            [
+                                metric_card(
+                                    "Главная категория",
+                                    top_cat_name,
+                                    format_money(top_cat_amount) if top_cat_amount > 0 else "Нет расходов",
+                                    ft.Colors.WHITE,
+                                    ft.Icons.PIE_CHART,
+                                ),
+                                metric_card(
+                                    "Потенциал экономии",
+                                    format_money(possible_saving),
+                                    "20% от лидирующей категории" if possible_saving > 0 else "появится после накопления расходов",
+                                    ft.Colors.WHITE,
+                                    ft.Icons.SAVINGS,
+                                ),
+                            ],
+                            spacing=8,
+                        ),
+                    ] + [ft.Text(f"• {item}") for item in data["overview"][1:]],
+                    spacing=10,
+                ),
+            )
+        )
+
+        if data["top_categories"]:
+            category_controls = [
+                ft.Text("Куда уходят деньги в месяц", size=16, weight="bold"),
+                ft.Text("Основные категории расходов за текущий месяц.", color=ft.Colors.GREY_700, size=12),
+            ]
+            max_amount = max(amount for _, amount in data["top_categories"]) or 1.0
+            for cat, amount in data["top_categories"][:6]:
+                pct = (amount / total_expense * 100) if total_expense > 0 else 0
+                bar_ratio = max(0.12, amount / max_amount)
+                category_controls.append(
+                    ft.Container(
+                        padding=12,
+                        bgcolor=ft.Colors.WHITE,
+                        border_radius=16,
+                        content=ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Text(cat, weight="bold", expand=True, max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
+                                        ft.Text(format_money(amount), size=13, weight="bold"),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                ),
+                                ft.Container(
+                                    height=8,
+                                    bgcolor=ft.Colors.BLUE_100,
+                                    border_radius=999,
+                                    clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                                    content=ft.Row(
+                                        [
+                                            ft.Container(
+                                                width=max(24, int(220 * bar_ratio)),
+                                                height=8,
+                                                bgcolor=ft.Colors.BLUE_500,
+                                                border_radius=999,
+                                            ),
+                                        ],
+                                        spacing=0,
+                                    ),
+                                ),
+                                ft.Text(f"{pct:.0f}% от месячных расходов", size=11, color=ft.Colors.GREY_700),
+                            ],
+                            spacing=6,
+                        ),
+                    )
+                )
+        else:
+            category_controls = [
+                ft.Text("Куда уходят деньги в месяц", size=16, weight="bold"),
+                ft.Text("Пока нет данных по расходам за текущий месяц."),
+            ]
+        controls.append(ft.Container(content=ft.Column(category_controls, spacing=8), padding=14, bgcolor=ft.Colors.GREEN_50, border_radius=22))
+
+        controls.append(
+            ft.Container(
+                padding=14,
+                bgcolor=ft.Colors.AMBER_50,
+                border_radius=22,
+                content=ft.Column(
+                    [ft.Text("Регулярные траты", size=16, weight="bold")]
+                    + [ft.Text(f"• {item}") for item in (data["regular_spending"] or ["Регулярные категории пока не определены."])],
+                    spacing=8,
+                ),
+            )
+        )
+
+        controls.append(
+            ft.Container(
+                padding=14,
+                bgcolor=ft.Colors.CYAN_50,
+                border_radius=22,
+                content=ft.Column([ft.Text("Еженедельный отчёт", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in data["weekly_report"]], spacing=8),
+            )
+        )
+
+        controls.append(
+            ft.Container(
+                padding=14,
+                bgcolor=ft.Colors.INDIGO_50,
+                border_radius=22,
+                content=ft.Column([ft.Text("Инвестиционное поведение", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in data["invest_insights"]], spacing=8),
+            )
+        )
+
+        controls.append(
+            ft.Container(
+                padding=14,
+                bgcolor=ft.Colors.RED_50,
+                border_radius=22,
+                content=ft.Column([ft.Text("Анти-ошибки", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in (data["warnings"] or ["Сейчас критичных финансовых сигналов не обнаружено."])], spacing=8),
+            )
+        )
+
+        return ft.Column(controls, scroll=ft.ScrollMode.AUTO, spacing=10, expand=True)
+
     def rank_assistant_matches(query: str):
         query_words = [w for w in re.split(r"\s+", query.lower()) if w]
         matches = []
-        for node in flatten_assistant_nodes(ASSISTANT_TREE):
+        for node in flatten_assistant_nodes(ASSISTANT_ROOT_TREE):
             hay_parts = [
                 node.get("title", ""),
                 node.get("description", ""),
@@ -1883,7 +2346,7 @@ def main(page: ft.Page):
         return unique
 
     def build_related_topic_suggestions(query: str):
-        all_nodes = [n for n in flatten_assistant_nodes(ASSISTANT_TREE) if n.get("children") or n.get("instructions")]
+        all_nodes = [n for n in flatten_assistant_nodes(ASSISTANT_ROOT_TREE) if n.get("children") or n.get("instructions")]
         query_words = [w for w in re.split(r"\s+", query.lower()) if len(w) > 2]
         scored = []
         for node in all_nodes:
@@ -1910,10 +2373,15 @@ def main(page: ft.Page):
 
     def build_assistant_view():
         current_node, current_children = get_nodes_by_path(assistant_state["path"])
+        if current_node and current_node.get("id") == "capital_analyzer":
+            return build_capital_analyzer_view()
+
         selected_id = assistant_state["selected"]
         selected_node = None
         if selected_id:
-            selected_node = next((n for n in flatten_assistant_nodes(ASSISTANT_TREE) if n["id"] == selected_id), None)
+            selected_node = next((n for n in flatten_assistant_nodes(ASSISTANT_ROOT_TREE) if n["id"] == selected_id), None)
+            if selected_node and selected_node.get("id") == "capital_analyzer":
+                return build_capital_analyzer_view()
 
         search_field = ft.TextField(
             label="Поиск по темам и подтемам",
@@ -1926,7 +2394,7 @@ def main(page: ft.Page):
 
         body_controls = [
             ft.Text("Цифровой помощник", size=20, weight="bold"),
-            ft.Text("Структурированные ответы по банковским темам без свободного чата.", color=ft.Colors.GREY_700),
+            ft.Text("Выберите нужный режим: интересующие вопросы или анализатор капитала.", color=ft.Colors.GREY_700),
             search_field,
             ft.Button(
                 "Найти",
@@ -2017,9 +2485,9 @@ def main(page: ft.Page):
                 body_controls.append(ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(current_node["title"], size=18, weight="bold")]))
                 body_controls.append(ft.Text(current_node.get("description", ""), color=ft.Colors.GREY_700))
             else:
-                body_controls.append(ft.Text("Основные категории", weight="bold"))
+                body_controls.append(ft.Text("Выберите раздел", weight="bold"))
 
-            for node in current_children if current_node else ASSISTANT_TREE:
+            for node in current_children if current_node else ASSISTANT_ROOT_TREE:
                 is_leaf = not node.get("children")
                 body_controls.append(
                     ft.Card(
@@ -2028,7 +2496,7 @@ def main(page: ft.Page):
                             title=ft.Text(node["title"], weight="bold"),
                             subtitle=ft.Text(node.get("description", "")),
                             trailing=ft.Text("Инструкция" if is_leaf else "Раздел", size=11, color=ft.Colors.BLUE_700),
-                            on_click=(lambda e, nid=node["id"]: assistant_open_result(nid) if is_leaf else assistant_open_category(nid)),
+                            on_click=(lambda e, nid=node["id"], leaf=is_leaf: assistant_open_result(nid) if leaf else assistant_open_category(nid)),
                         )
                     )
                 )
