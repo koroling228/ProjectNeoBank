@@ -1013,26 +1013,27 @@ def seed_demo_if_empty():
 seed_demo_if_empty()
 
 
-def mobile_shell(content):
+def mobile_shell(content, shell_bg=ft.Colors.WHITE, outer_bg=ft.Colors.BLACK, shell_border=None):
     phone = ft.Container(
         content=content,
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=shell_bg,
         border_radius=28,
         padding=12,
         width=360,
         height=780,
         expand=False,
+        border=shell_border,
         shadow=ft.BoxShadow(blur_radius=24),
     )
     return ft.Container(
         content=ft.Row([phone], alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER),
         expand=True,
-        bgcolor=ft.Colors.BLACK,
+        bgcolor=outer_bg,
         padding=12,
     )
 
 
-def bank_card_widget(account_str: str, balance_val: float):
+def bank_card_widget(account_str: str, balance_val: float, card_bg="#1e3c72"):
     try:
         bal = float(balance_val)
     except:
@@ -1054,7 +1055,7 @@ def bank_card_widget(account_str: str, balance_val: float):
         ),
         padding=16,
         border_radius=18,
-        bgcolor="#1e3c72",
+        bgcolor=card_bg,
     )
 
 
@@ -1073,8 +1074,171 @@ def main(page: ft.Page):
         "auth_mode": "login",
     }
 
+    LIGHT_PALETTE = {
+        "shell_outer": "#050505",
+        "shell_surface": ft.Colors.WHITE,
+        "shell_border": None,
+        "surface": ft.Colors.WHITE,
+        "surface_alt": "#F1F5F9",
+        "input_bg": ft.Colors.WHITE,
+        "border": "#DCE3EC",
+        "text": "#111827",
+        "muted": "#6B7280",
+        "subtle": "#9CA3AF",
+        "primary": "#1D4ED8",
+        "primary_soft": "#EAF2FF",
+        "primary_border": "#CFE0FF",
+        "primary_card": "#1E3C72",
+        "success_soft": "#ECFDF3",
+        "success_border": "#CBEBD7",
+        "success_text": "#15803D",
+        "warning_soft": "#FFF7E8",
+        "warning_border": "#F2D39B",
+        "warning_text": "#B45309",
+        "danger_soft": "#FFF1F2",
+        "danger_border": "#F6C6CC",
+        "danger_text": "#BE123C",
+        "neutral_soft": "#F3F4F6",
+        "neutral_border": "#D1D5DB",
+        "cyan_soft": "#ECFEFF",
+        "indigo_soft": "#EEF2FF",
+        "bar_bg": "#DBEAFE",
+        "bar_fill": "#3B82F6",
+        "nav_bg": ft.Colors.WHITE,
+        "nav_indicator": "#CFE0FF",
+    }
+
+    DARK_PALETTE = {
+        "shell_outer": "#04070D",
+        "shell_surface": "#0B1220",
+        "shell_border": ft.Border.all(1, "#1F2A3A"),
+        "surface": "#111827",
+        "surface_alt": "#182131",
+        "input_bg": "#111B2B",
+        "border": "#2A3443",
+        "text": "#F8FAFC",
+        "muted": "#CBD5E1",
+        "subtle": "#94A3B8",
+        "primary": "#9EC5FF",
+        "primary_soft": "#162338",
+        "primary_border": "#2B4166",
+        "primary_card": "#1E3A8A",
+        "success_soft": "#13261D",
+        "success_border": "#244431",
+        "success_text": "#86EFAC",
+        "warning_soft": "#2C2212",
+        "warning_border": "#5E4A25",
+        "warning_text": "#FBBF24",
+        "danger_soft": "#2B171B",
+        "danger_border": "#5D2C34",
+        "danger_text": "#FDA4AF",
+        "neutral_soft": "#1B2432",
+        "neutral_border": "#384456",
+        "cyan_soft": "#102733",
+        "indigo_soft": "#1B2241",
+        "bar_bg": "#253550",
+        "bar_fill": "#5C8DFF",
+        "nav_bg": "#0F172A",
+        "nav_indicator": "#1D4ED8",
+    }
+
+    def current_theme_name() -> str:
+        u = state.get("user")
+        if u:
+            settings = user_get_settings(u["id"])
+            return "dark" if settings.get("theme", "light") == "dark" else "light"
+        return "dark" if page.theme_mode == ft.ThemeMode.DARK else "light"
+
+    def is_dark_theme() -> bool:
+        return current_theme_name() == "dark"
+
+    def palette() -> Dict[str, Any]:
+        return DARK_PALETTE if is_dark_theme() else LIGHT_PALETTE
+
+    def ui_color(name: str):
+        return palette()[name]
+
+    def sync_form_control_theme(control):
+        if control is None:
+            return
+
+        for attr, value in {
+            "bgcolor": ui_color("input_bg"),
+            "color": ui_color("text"),
+            "border_color": ui_color("border"),
+            "focused_border_color": ui_color("primary"),
+            "cursor_color": ui_color("primary"),
+            "prefix_icon_color": ui_color("muted"),
+            "suffix_icon_color": ui_color("muted"),
+            "icon_enabled_color": ui_color("muted"),
+            "icon_disabled_color": ui_color("subtle"),
+        }.items():
+            if hasattr(control, attr):
+                try:
+                    setattr(control, attr, value)
+                except Exception:
+                    pass
+
+        if hasattr(control, "text_style"):
+            try:
+                control.text_style = ft.TextStyle(color=ui_color("text"))
+            except Exception:
+                pass
+        if hasattr(control, "label_style"):
+            try:
+                control.label_style = ft.TextStyle(color=ui_color("muted"))
+            except Exception:
+                pass
+        if hasattr(control, "hint_style"):
+            try:
+                control.hint_style = ft.TextStyle(color=ui_color("subtle"))
+            except Exception:
+                pass
+
+    def sync_theme_controls():
+        page.theme_mode = ft.ThemeMode.DARK if is_dark_theme() else ft.ThemeMode.LIGHT
+        page.bgcolor = ui_color("shell_outer")
+
+        try:
+            nav.bgcolor = ui_color("nav_bg")
+            nav.indicator_color = ui_color("nav_indicator")
+        except Exception:
+            pass
+
+        for control in [
+            login_email,
+            login_pwd,
+            reg_name_tf,
+            reg_email_tf,
+            reg_phone_tf,
+            reg_pwd_tf,
+            reg_pwdc_tf,
+            conv_amount,
+            conv_from,
+            conv_to,
+            history_search_tf,
+            history_date_from_tf,
+            history_date_to_tf,
+            history_type_dd,
+            history_min_amount_tf,
+            history_max_amount_tf,
+            profile_name_tf,
+            profile_email_tf,
+            profile_phone_tf,
+            profile_account_tf,
+            profile_lang_dd,
+            profile_theme_dd,
+        ]:
+            sync_form_control_theme(control)
+
+        conv_result.color = ui_color("muted")
+        history_summary_text.color = ui_color("muted")
+
     def toast(text: str):
-        page.snack_bar = ft.SnackBar(ft.Text(text))
+        page.snack_bar = ft.SnackBar(
+            ft.Text(text, color=ui_color("text")),
+            bgcolor=ui_color("surface_alt"),
+        )
         page.snack_bar.open = True
         page.update()
 
@@ -1162,7 +1326,7 @@ def main(page: ft.Page):
         value="RUB",
         options=[ft.dropdown.Option(k) for k in ["RUB", "USD", "EUR", "CNY"]],
     )
-    conv_result = ft.Text("Введите сумму и нажмите «Конвертировать».", color=ft.Colors.GREY_700)
+    conv_result = ft.Text("Введите сумму и нажмите «Конвертировать».", color=ui_color("muted"))
 
     history_search_tf = ft.TextField(
         label="Поиск",
@@ -1188,7 +1352,7 @@ def main(page: ft.Page):
     )
     history_min_amount_tf = ft.TextField(label="Сумма от", hint_text="0", width=140, dense=True)
     history_max_amount_tf = ft.TextField(label="Сумма до", hint_text="10000", width=140, dense=True)
-    history_summary_text = ft.Text("", color=ft.Colors.GREY_700, size=12)
+    history_summary_text = ft.Text("", color=ui_color("muted"), size=12)
 
     profile_name_tf = ft.TextField(label="ФИО", width=320, read_only=True)
     profile_email_tf = ft.TextField(label="Email", width=320, read_only=True)
@@ -1220,12 +1384,7 @@ def main(page: ft.Page):
     )
 
     def apply_theme_from_settings():
-        u = state.get("user")
-        if not u:
-            return
-        settings = user_get_settings(u["id"])
-        theme = settings.get("theme", "light")
-        page.theme_mode = ft.ThemeMode.DARK if theme == "dark" else ft.ThemeMode.LIGHT
+        sync_theme_controls()
 
     def is_sound_enabled() -> bool:
         u = state.get("user")
@@ -1233,13 +1392,6 @@ def main(page: ft.Page):
             return True
         settings = user_get_settings(u["id"])
         return settings.get("sound", "on") != "off"
-
-    def apply_sound_button_state(button):
-        if not button:
-            return
-        muted = not is_sound_enabled()
-        button.icon = ft.Icons.VOLUME_OFF if muted else ft.Icons.VOLUME_UP
-        button.tooltip = "Включить звук" if muted else "Выключить звук"
 
     def toggle_sound(e=None):
         u = state.get("user")
@@ -1252,22 +1404,10 @@ def main(page: ft.Page):
         user_save_settings(u["id"], {"sound": new_value})
         state["user"] = user_get_by_email(u["email"])
 
-        if e is not None and getattr(e, "control", None) is not None:
-            apply_sound_button_state(e.control)
-
         if nav.selected_index == 0:
             main_container.content = build_home_view()
         page.update()
         toast("Звук выключен" if new_value == "off" else "Звук включён")
-
-    def build_sound_icon_button():
-        button = ft.IconButton(
-            icon=ft.Icons.VOLUME_UP,
-            icon_size=24,
-            on_click=toggle_sound,
-        )
-        apply_sound_button_state(button)
-        return button
 
     def refresh_profile_view():
         u = state["user"]
@@ -1302,11 +1442,11 @@ def main(page: ft.Page):
             amount_text = f"+{amount_text}"
 
         if amount > 0:
-            amount_color = ft.Colors.GREEN_700
+            amount_color = ui_color("success_text")
         elif amount < 0:
-            amount_color = ft.Colors.RED_700
+            amount_color = ui_color("danger_text")
         else:
-            amount_color = ft.Colors.BLACK
+            amount_color = ui_color("text")
 
         subtitle_parts = [human_op_type(op_type), date_str]
         if details:
@@ -1321,7 +1461,7 @@ def main(page: ft.Page):
                                 ft.Column(
                                     [
                                         ft.Text(title, weight="bold", size=14),
-                                        ft.Text(" • ".join(subtitle_parts), size=11, color=ft.Colors.GREY_700),
+                                        ft.Text(" • ".join(subtitle_parts), size=11, color=ui_color("muted")),
                                     ],
                                     spacing=4,
                                     expand=True,
@@ -1347,12 +1487,12 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Icon(ft.Icons.SEARCH_OFF, size=34, color=ft.Colors.GREY_500),
+                            ft.Icon(ft.Icons.SEARCH_OFF, size=34, color=ui_color("subtle")),
                             ft.Text("Операции не найдены", weight="bold"),
                             ft.Text(
                                 "Попробуйте изменить параметры поиска или фильтрации.",
                                 size=12,
-                                color=ft.Colors.GREY_700,
+                                color=ui_color("muted"),
                                 text_align=ft.TextAlign.CENTER,
                             ),
                         ],
@@ -1427,7 +1567,7 @@ def main(page: ft.Page):
                                         ft.Column(
                                             [
                                                 ft.Text(d["name"], weight="bold", size=16),
-                                                ft.Text(f"Срок до {d['ends']}", size=12, color=ft.Colors.GREY_700),
+                                                ft.Text(f"Срок до {d['ends']}", size=12, color=ui_color("muted")),
                                             ],
                                             spacing=2,
                                             expand=True,
@@ -1436,7 +1576,7 @@ def main(page: ft.Page):
                                             ft.Text(status, size=11, weight="bold"),
                                             padding=ft.padding.symmetric(horizontal=10, vertical=6),
                                             border_radius=12,
-                                            bgcolor=ft.Colors.GREEN_50 if d["active"] else ft.Colors.GREY_200,
+                                            bgcolor=ui_color("success_soft") if d["active"] else ui_color("surface_alt"),
                                         ),
                                     ]
                                 ),
@@ -1447,14 +1587,14 @@ def main(page: ft.Page):
                                     ],
                                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 ),
-                                ft.Text(f"Ожидаемый доход за период: ≈ {profit:,.2f} RUB", size=12, color=ft.Colors.BLUE_700),
+                                ft.Text(f"Ожидаемый доход за период: ≈ {profit:,.2f} RUB", size=12, color=ui_color("primary")),
                             ],
                             spacing=8,
                         ),
                         padding=14,
                         border_radius=18,
-                        bgcolor=ft.Colors.WHITE,
-                        border=ft.Border.all(1, ft.Colors.BLUE_100),
+                        bgcolor=ui_color("surface"),
+                        border=ft.Border.all(1, ui_color("border")),
                     )
                 )
         else:
@@ -1591,11 +1731,11 @@ def main(page: ft.Page):
                         width=72,
                         height=72,
                         border_radius=20,
-                        bgcolor="#1e3c72",
+                        bgcolor=ui_color("primary_card"),
                         alignment=ft.alignment.Alignment(0, 0),
                     ),
                     ft.Text("NeoBank", size=24, weight="bold"),
-                    ft.Text("Личный цифровой банк", size=12, color=ft.Colors.GREY_700),
+                    ft.Text("Личный цифровой банк", size=12, color=ui_color("muted")),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=8,
@@ -1611,8 +1751,8 @@ def main(page: ft.Page):
                             "Вход",
                             on_click=lambda e: switch_auth_mode("login"),
                             style=ft.ButtonStyle(
-                                color=ft.Colors.WHITE if is_login else ft.Colors.BLUE_800,
-                                bgcolor="#1e3c72" if is_login else ft.Colors.BLUE_50,
+                                color=ft.Colors.WHITE if is_login else ui_color("primary"),
+                                bgcolor=ui_color("primary_card") if is_login else ui_color("surface_alt"),
                                 shape=ft.RoundedRectangleBorder(radius=14),
                             ),
                         ),
@@ -1623,8 +1763,8 @@ def main(page: ft.Page):
                             "Регистрация",
                             on_click=lambda e: switch_auth_mode("register"),
                             style=ft.ButtonStyle(
-                                color=ft.Colors.WHITE if not is_login else ft.Colors.BLUE_800,
-                                bgcolor="#1e3c72" if not is_login else ft.Colors.BLUE_50,
+                                color=ft.Colors.WHITE if not is_login else ui_color("primary"),
+                                bgcolor=ui_color("primary_card") if not is_login else ui_color("surface_alt"),
                                 shape=ft.RoundedRectangleBorder(radius=14),
                             ),
                         ),
@@ -1659,7 +1799,7 @@ def main(page: ft.Page):
                     ft.Text(
                         "Для демонстрации: demo@example.com / DemoPass1!",
                         size=12,
-                        color=ft.Colors.GREY_700,
+                        color=ui_color("muted"),
                         text_align=ft.TextAlign.CENTER,
                     ),
                 ],
@@ -1685,7 +1825,7 @@ def main(page: ft.Page):
                     ft.Text(
                         "Пароль: минимум 8 символов, заглавная, строчная, цифра и спецсимвол.",
                         size=12,
-                        color=ft.Colors.GREY_700,
+                        color=ui_color("muted"),
                         text_align=ft.TextAlign.CENTER,
                     ),
                 ],
@@ -1700,8 +1840,8 @@ def main(page: ft.Page):
                     content=ft.Column([tabs, form], spacing=8),
                     padding=18,
                     border_radius=22,
-                    bgcolor=ft.Colors.WHITE,
-                    border=ft.Border.all(1, ft.Colors.BLUE_100),
+                    bgcolor=ui_color("surface"),
+                    border=ft.Border.all(1, ui_color("border")),
                     shadow=ft.BoxShadow(blur_radius=18),
                 ),
             ],
@@ -1802,13 +1942,16 @@ def main(page: ft.Page):
             page.dialog.open = False
             page.update()
 
+        sync_form_control_theme(prod_dd)
+        sync_form_control_theme(sum_tf)
         page.dialog = ft.AlertDialog(
-            title=ft.Text("Открытие вклада"),
+            title=ft.Text("Открытие вклада", color=ui_color("text")),
             content=ft.Column([prod_dd, sum_tf], spacing=8, tight=True),
             actions=[
                 ft.TextButton("Отмена", on_click=cancel),
                 ft.ElevatedButton("Открыть", on_click=ok),
             ],
+            bgcolor=ui_color("surface"),
         )
         page.dialog.open = True
         page.update()
@@ -1842,8 +1985,7 @@ def main(page: ft.Page):
         state["user"] = user_get_by_email(u["email"])
         apply_theme_from_settings()
         refresh_profile_view()
-        main_container.content = build_profile_view()
-        page.update()
+        switch_to_home(nav.selected_index if nav.selected_index is not None else 2)
         toast("Профиль обновлён")
 
     def toggle_profile_edit(e=None):
@@ -1891,10 +2033,14 @@ def main(page: ft.Page):
             close_dialog()
             toast("Пароль успешно изменён")
 
+        sync_form_control_theme(old_tf)
+        sync_form_control_theme(new_tf)
+        sync_form_control_theme(confirm_tf)
         page.dialog = ft.AlertDialog(
-            title=ft.Text("Смена пароля"),
+            title=ft.Text("Смена пароля", color=ui_color("text")),
             content=ft.Column([old_tf, new_tf, confirm_tf], tight=True, spacing=8),
             actions=[ft.TextButton("Отмена", on_click=close_dialog), ft.ElevatedButton("Сохранить", on_click=do_change)],
+            bgcolor=ui_color("surface"),
         )
         page.dialog.open = True
         page.update()
@@ -1954,22 +2100,22 @@ def main(page: ft.Page):
         if not items:
             return None
 
-        bgcolor = ft.Colors.BLUE_50
-        border_color = ft.Colors.BLUE_200
-        icon_color = ft.Colors.BLUE_700
+        bgcolor = ui_color("primary_soft")
+        border_color = ui_color("primary_border")
+        icon_color = ui_color("primary")
 
         if tone == "warning":
-            bgcolor = ft.Colors.ORANGE_50
-            border_color = ft.Colors.ORANGE_200
-            icon_color = ft.Colors.ORANGE_700
+            bgcolor = ui_color("warning_soft")
+            border_color = ui_color("warning_border")
+            icon_color = ui_color("warning_text")
         elif tone == "success":
-            bgcolor = ft.Colors.GREEN_50
-            border_color = ft.Colors.GREEN_200
-            icon_color = ft.Colors.GREEN_700
+            bgcolor = ui_color("success_soft")
+            border_color = ui_color("success_border")
+            icon_color = ui_color("success_text")
         elif tone == "neutral":
-            bgcolor = ft.Colors.GREY_100
-            border_color = ft.Colors.GREY_300
-            icon_color = ft.Colors.GREY_700
+            bgcolor = ui_color("neutral_soft")
+            border_color = ui_color("neutral_border")
+            icon_color = ui_color("muted")
 
         rows = [
             ft.Row(
@@ -2165,13 +2311,13 @@ def main(page: ft.Page):
                         ft.Row(
                             [
                                 ft.Icon(icon_name, size=16),
-                                ft.Text(title, color=ft.Colors.GREY_700, size=11, expand=True, no_wrap=False, max_lines=2),
+                                ft.Text(title, color=ui_color("muted"), size=11, expand=True, no_wrap=False, max_lines=2),
                             ],
                             spacing=5,
                             vertical_alignment=ft.CrossAxisAlignment.START,
                         ),
                         ft.Text(value, size=15, weight="bold", max_lines=2, no_wrap=False),
-                        ft.Text(subtitle, size=10, color=ft.Colors.GREY_700, max_lines=3, no_wrap=False),
+                        ft.Text(subtitle, size=10, color=ui_color("muted"), max_lines=3, no_wrap=False),
                     ],
                     spacing=4,
                     tight=True,
@@ -2183,9 +2329,9 @@ def main(page: ft.Page):
             ft.Text("Анализатор капитала", size=18, weight="bold"),
             ft.Text(
                 "Наглядный разбор месячных расходов: куда уходят деньги, какие траты повторяются и где можно освободить часть бюджета.",
-                color=ft.Colors.GREY_700,
+                color=ui_color("muted"),
             ),
-            ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text("Назад к выбору режима", color=ft.Colors.BLUE_700)]),
+            ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text("Назад к выбору режима", color=ui_color("primary"))]),
         ]
 
         overview_main = data["overview"][0] if data["overview"] else "Пока недостаточно данных для анализа."
@@ -2197,7 +2343,7 @@ def main(page: ft.Page):
         controls.append(
             ft.Container(
                 padding=16,
-                bgcolor=ft.Colors.BLUE_50,
+                bgcolor=ui_color("primary_soft"),
                 border_radius=22,
                 content=ft.Column(
                     [
@@ -2207,12 +2353,12 @@ def main(page: ft.Page):
                                 ft.Container(
                                     expand=True,
                                     padding=10,
-                                    bgcolor=ft.Colors.GREEN_50,
+                                    bgcolor=ui_color("success_soft"),
                                     border_radius=16,
                                     content=ft.Column(
                                         [
-                                            ft.Text("Финансовая устойчивость", size=12, color=ft.Colors.GREY_700),
-                                            ft.Text("Стабильная", weight="bold", color=ft.Colors.GREEN_700),
+                                            ft.Text("Финансовая устойчивость", size=12, color=ui_color("muted")),
+                                            ft.Text("Стабильная", weight="bold", color=ui_color("success_text")),
                                             ft.Text("После расходов остаётся достаточный резерв.", size=10),
                                         ],
                                         spacing=4,
@@ -2221,12 +2367,12 @@ def main(page: ft.Page):
                                 ft.Container(
                                     expand=True,
                                     padding=10,
-                                    bgcolor=ft.Colors.ORANGE_50,
+                                    bgcolor=ui_color("warning_soft"),
                                     border_radius=16,
                                     content=ft.Column(
                                         [
-                                            ft.Text("Прогноз экономии", size=12, color=ft.Colors.GREY_700),
-                                            ft.Text("≈ 3 000 ₽ / мес", weight="bold", color=ft.Colors.ORANGE_700),
+                                            ft.Text("Прогноз экономии", size=12, color=ui_color("muted")),
+                                            ft.Text("≈ 3 000 ₽ / мес", weight="bold", color=ui_color("warning_text")),
                                             ft.Text("если сократить 2‑3 крупнейшие категории", size=10),
                                         ],
                                         spacing=4,
@@ -2243,14 +2389,14 @@ def main(page: ft.Page):
                                     "Главная категория",
                                     top_cat_name,
                                     format_money(top_cat_amount) if top_cat_amount > 0 else "Нет расходов",
-                                    ft.Colors.WHITE,
+                                    ui_color("surface"),
                                     ft.Icons.PIE_CHART,
                                 ),
                                 metric_card(
                                     "Потенциал экономии",
                                     format_money(possible_saving),
                                     "20% от лидирующей категории" if possible_saving > 0 else "появится после накопления расходов",
-                                    ft.Colors.WHITE,
+                                    ui_color("surface"),
                                     ft.Icons.SAVINGS,
                                 ),
                             ],
@@ -2265,7 +2411,7 @@ def main(page: ft.Page):
         if data["top_categories"]:
             category_controls = [
                 ft.Text("Куда уходят деньги в месяц", size=16, weight="bold"),
-                ft.Text("Основные категории расходов за текущий месяц.", color=ft.Colors.GREY_700, size=12),
+                ft.Text("Основные категории расходов за текущий месяц.", color=ui_color("muted"), size=12),
             ]
             max_amount = max(amount for _, amount in data["top_categories"]) or 1.0
             for cat, amount in data["top_categories"][:6]:
@@ -2274,7 +2420,7 @@ def main(page: ft.Page):
                 category_controls.append(
                     ft.Container(
                         padding=12,
-                        bgcolor=ft.Colors.WHITE,
+                        bgcolor=ui_color("surface"),
                         border_radius=16,
                         content=ft.Column(
                             [
@@ -2287,7 +2433,7 @@ def main(page: ft.Page):
                                 ),
                                 ft.Container(
                                     height=8,
-                                    bgcolor=ft.Colors.BLUE_100,
+                                    bgcolor=ui_color("bar_bg"),
                                     border_radius=999,
                                     clip_behavior=ft.ClipBehavior.HARD_EDGE,
                                     content=ft.Row(
@@ -2295,14 +2441,14 @@ def main(page: ft.Page):
                                             ft.Container(
                                                 width=max(24, int(220 * bar_ratio)),
                                                 height=8,
-                                                bgcolor=ft.Colors.BLUE_500,
+                                                bgcolor=ui_color("bar_fill"),
                                                 border_radius=999,
                                             ),
                                         ],
                                         spacing=0,
                                     ),
                                 ),
-                                ft.Text(f"{pct:.0f}% от месячных расходов", size=11, color=ft.Colors.GREY_700),
+                                ft.Text(f"{pct:.0f}% от месячных расходов", size=11, color=ui_color("muted")),
                             ],
                             spacing=6,
                         ),
@@ -2313,12 +2459,12 @@ def main(page: ft.Page):
                 ft.Text("Куда уходят деньги в месяц", size=16, weight="bold"),
                 ft.Text("Пока нет данных по расходам за текущий месяц."),
             ]
-        controls.append(ft.Container(content=ft.Column(category_controls, spacing=8), padding=14, bgcolor=ft.Colors.GREEN_50, border_radius=22))
+        controls.append(ft.Container(content=ft.Column(category_controls, spacing=8), padding=14, bgcolor=ui_color("success_soft"), border_radius=22))
 
         controls.append(
             ft.Container(
                 padding=14,
-                bgcolor=ft.Colors.AMBER_50,
+                bgcolor=ui_color("warning_soft"),
                 border_radius=22,
                 content=ft.Column(
                     [ft.Text("Регулярные траты", size=16, weight="bold")]
@@ -2331,7 +2477,7 @@ def main(page: ft.Page):
         controls.append(
             ft.Container(
                 padding=14,
-                bgcolor=ft.Colors.CYAN_50,
+                bgcolor=ui_color("cyan_soft"),
                 border_radius=22,
                 content=ft.Column([ft.Text("Еженедельный отчёт", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in data["weekly_report"]], spacing=8),
             )
@@ -2340,7 +2486,7 @@ def main(page: ft.Page):
         controls.append(
             ft.Container(
                 padding=14,
-                bgcolor=ft.Colors.INDIGO_50,
+                bgcolor=ui_color("indigo_soft"),
                 border_radius=22,
                 content=ft.Column([ft.Text("Инвестиционное поведение", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in data["invest_insights"]], spacing=8),
             )
@@ -2349,7 +2495,7 @@ def main(page: ft.Page):
         controls.append(
             ft.Container(
                 padding=14,
-                bgcolor=ft.Colors.RED_50,
+                bgcolor=ui_color("danger_soft"),
                 border_radius=22,
                 content=ft.Column([ft.Text("Анти-ошибки", size=16, weight="bold")] + [ft.Text(f"• {item}") for item in (data["warnings"] or ["Сейчас критичных финансовых сигналов не обнаружено."])], spacing=8),
             )
@@ -2437,7 +2583,7 @@ def main(page: ft.Page):
 
         body_controls = [
             ft.Text("Цифровой помощник", size=20, weight="bold"),
-            ft.Text("Выберите нужный режим: интересующие вопросы или анализатор капитала.", color=ft.Colors.GREY_700),
+            ft.Text("Выберите нужный режим: интересующие вопросы или анализатор капитала.", color=ui_color("muted")),
             search_field,
             ft.Button(
                 "Найти",
@@ -2481,8 +2627,8 @@ def main(page: ft.Page):
                     ft.Container(
                         content=ft.Column(related_controls, spacing=4),
                         padding=12,
-                        bgcolor=ft.Colors.AMBER_50,
-                        border=ft.Border.all(1, ft.Colors.AMBER_200),
+                        bgcolor=ui_color("warning_soft"),
+                        border=ft.Border.all(1, ui_color("warning_border")),
                         border_radius=16,
                     )
                 )
@@ -2490,7 +2636,7 @@ def main(page: ft.Page):
             breadcrumb = selected_node.get("path_titles", [])
             body_controls.append(
                 ft.Row(
-                    [ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(" → ".join(breadcrumb), expand=True, color=ft.Colors.GREY_700)],
+                    [ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(" → ".join(breadcrumb), expand=True, color=ui_color("muted"))],
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 )
             )
@@ -2502,12 +2648,12 @@ def main(page: ft.Page):
                                 [ft.Icon(selected_node.get("icon") or ft.Icons.ARTICLE, size=28), ft.Text(selected_node["title"], size=18, weight="bold")],
                                 spacing=10,
                             ),
-                            ft.Text(selected_node.get("description", ""), color=ft.Colors.GREY_700),
+                            ft.Text(selected_node.get("description", ""), color=ui_color("muted")),
                         ],
                         spacing=8,
                     ),
                     padding=14,
-                    bgcolor=ft.Colors.BLUE_50,
+                    bgcolor=ui_color("primary_soft"),
                     border_radius=18,
                 )
             )
@@ -2526,7 +2672,7 @@ def main(page: ft.Page):
         else:
             if current_node:
                 body_controls.append(ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(current_node["title"], size=18, weight="bold")]))
-                body_controls.append(ft.Text(current_node.get("description", ""), color=ft.Colors.GREY_700))
+                body_controls.append(ft.Text(current_node.get("description", ""), color=ui_color("muted")))
             else:
                 body_controls.append(ft.Text("Выберите раздел", weight="bold"))
 
@@ -2538,7 +2684,7 @@ def main(page: ft.Page):
                             leading=ft.Icon(node.get("icon") or ft.Icons.FOLDER),
                             title=ft.Text(node["title"], weight="bold"),
                             subtitle=ft.Text(node.get("description", "")),
-                            trailing=ft.Text("Инструкция" if is_leaf else "Раздел", size=11, color=ft.Colors.BLUE_700),
+                            trailing=ft.Text("Инструкция" if is_leaf else "Раздел", size=11, color=ui_color("primary")),
                             on_click=(lambda e, nid=node["id"], leaf=is_leaf: assistant_open_result(nid) if leaf else assistant_open_category(nid)),
                         )
                     )
@@ -2549,33 +2695,34 @@ def main(page: ft.Page):
     def build_home_view():
         u = state["user"]
         settings = user_get_settings(u["id"]) if u else {"language": "Русский"}
-        card = bank_card_widget(u.get("account", ""), u.get("balance", 0.0))
+        card = bank_card_widget(u.get("account", ""), u.get("balance", 0.0), ui_color("primary_card"))
+        sound_enabled = is_sound_enabled()
 
         summary_tiles = ft.Row(
             [
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Text("Баланс", size=12, color=ft.Colors.GREY_700),
+                            ft.Text("Баланс", size=12, color=ui_color("muted")),
                             ft.Text(f"{u.get('balance', 0.0):,.2f} RUB", weight="bold"),
                         ],
                         spacing=2,
                     ),
                     padding=12,
-                    bgcolor=ft.Colors.GREY_100,
+                    bgcolor=ui_color("neutral_soft"),
                     border_radius=16,
                     expand=True,
                 ),
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Text("Язык", size=12, color=ft.Colors.GREY_700),
+                            ft.Text("Язык", size=12, color=ui_color("muted")),
                             ft.Text(settings.get("language", "Русский"), weight="bold"),
                         ],
                         spacing=2,
                     ),
                     padding=12,
-                    bgcolor=ft.Colors.GREY_100,
+                    bgcolor=ui_color("neutral_soft"),
                     border_radius=16,
                     expand=True,
                 ),
@@ -2606,15 +2753,15 @@ def main(page: ft.Page):
             ),
             padding=14,
             border_radius=18,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.Border.all(1, ft.Colors.GREY_200),
+            bgcolor=ui_color("surface"),
+            border=ft.Border.all(1, ui_color("border")),
         )
 
         deposits_card = ft.Container(
             content=ft.Column(
                 [
                     ft.Row([ft.Text("Доступные вклады", weight="bold"), ft.ElevatedButton("Открыть вклад", icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog)]),
-                    ft.Text("Список продуктов со ставкой, сроком и минимальной суммой открытия.", size=12, color=ft.Colors.GREY_700),
+                    ft.Text("Список продуктов со ставкой, сроком и минимальной суммой открытия.", size=12, color=ui_color("muted")),
                     ft.Column(
                         [
                             ft.Container(
@@ -2623,7 +2770,7 @@ def main(page: ft.Page):
                                         ft.Column(
                                             [
                                                 ft.Text(p["name"], weight="bold"),
-                                                ft.Text(f"Срок: {p['term_months']} мес. • Мин. сумма: {p['min_sum']} RUB", size=12, color=ft.Colors.GREY_700),
+                                                ft.Text(f"Срок: {p['term_months']} мес. • Мин. сумма: {p['min_sum']} RUB", size=12, color=ui_color("muted")),
                                             ],
                                             expand=True,
                                             spacing=2,
@@ -2634,7 +2781,7 @@ def main(page: ft.Page):
                                 ),
                                 padding=12,
                                 border_radius=14,
-                                bgcolor=ft.Colors.BLUE_50,
+                                bgcolor=ui_color("primary_soft"),
                             )
                             for p in DEPOSIT_PRODUCTS
                         ],
@@ -2648,14 +2795,14 @@ def main(page: ft.Page):
             ),
             padding=14,
             border_radius=18,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.Border.all(1, ft.Colors.GREY_200),
+            bgcolor=ui_color("surface"),
+            border=ft.Border.all(1, ui_color("border")),
         )
 
         return ft.Column(
             [
                 ft.Text("Главная", size=20, weight="bold"),
-                ft.Text("Баланс, вклады и быстрые действия в одном экране.", color=ft.Colors.GREY_700),
+                ft.Text("Баланс, вклады и быстрые действия в одном экране.", color=ui_color("muted")),
                 card,
                 summary_tiles,
                 quick_actions,
@@ -2671,7 +2818,7 @@ def main(page: ft.Page):
         return ft.Column(
             [
                 ft.Text("История операций", size=20, weight="bold"),
-                ft.Text("Полная лента переводов, пополнений, расходов и операций по вкладам.", color=ft.Colors.GREY_700),
+                ft.Text("Полная лента переводов, пополнений, расходов и операций по вкладам.", color=ui_color("muted")),
                 ft.Divider(),
                 history_search_tf,
                 ft.Row([history_date_from_tf, history_date_to_tf], wrap=True, spacing=8),
@@ -2736,7 +2883,7 @@ def main(page: ft.Page):
         return ft.Column(
             [
                 ft.Text("Профиль и настройки", size=20, weight="bold"),
-                ft.Text("Личные данные, безопасность и персонализация приложения.", color=ft.Colors.GREY_700),
+                ft.Text("Личные данные, безопасность и персонализация приложения.", color=ui_color("muted")),
                 ft.Container(
                     content=ft.Column(
                         [
@@ -2760,15 +2907,15 @@ def main(page: ft.Page):
                         spacing=10,
                     ),
                     padding=14,
-                    bgcolor=ft.Colors.WHITE,
+                    bgcolor=ui_color("surface"),
                     border_radius=18,
-                    border=ft.Border.all(1, ft.Colors.GREY_200),
+                    border=ft.Border.all(1, ui_color("border")),
                 ),
                 ft.Container(
                     content=ft.Column(
                         [
                             ft.Text("Безопасность", weight="bold"),
-                            ft.Text("Смена пароля с подтверждением старого значения.", size=12, color=ft.Colors.GREY_700),
+                            ft.Text("Смена пароля с подтверждением старого значения.", size=12, color=ui_color("muted")),
                             ft.Row(
                                 [
                                     ft.ElevatedButton("Сменить пароль", icon=ft.Icons.LOCK_RESET, on_click=show_password_dialog),
@@ -2781,9 +2928,9 @@ def main(page: ft.Page):
                         spacing=10,
                     ),
                     padding=14,
-                    bgcolor=ft.Colors.WHITE,
+                    bgcolor=ui_color("surface"),
                     border_radius=18,
-                    border=ft.Border.all(1, ft.Colors.GREY_200),
+                    border=ft.Border.all(1, ui_color("border")),
                 ),
                 ft.Container(
                     content=ft.Column(
@@ -2791,14 +2938,14 @@ def main(page: ft.Page):
                             ft.Text("Настройки приложения", weight="bold"),
                             profile_lang_dd,
                             profile_theme_dd,
-                            ft.Text("Чтобы сменить тему, выберите вариант и нажмите «Сохранить».", size=12, color=ft.Colors.GREY_700),
+                            ft.Text("Чтобы сменить тему, выберите вариант и нажмите «Сохранить».", size=12, color=ui_color("muted")),
                         ],
                         spacing=10,
                     ),
                     padding=14,
-                    bgcolor=ft.Colors.WHITE,
+                    bgcolor=ui_color("surface"),
                     border_radius=18,
-                    border=ft.Border.all(1, ft.Colors.GREY_200),
+                    border=ft.Border.all(1, ui_color("border")),
                 ),
             ],
             spacing=12,
@@ -2824,7 +2971,8 @@ def main(page: ft.Page):
 
     nav.on_change = on_nav_change
 
-    def switch_to_home():
+    def switch_to_home(selected_index=0):
+        sync_theme_controls()
         page.controls.clear()
 
         top_row = ft.Row(
@@ -2832,26 +2980,37 @@ def main(page: ft.Page):
                 ft.Column(
                     [
                         ft.Text("NeoBank", size=18, weight="bold"),
-                        ft.Text("Личный цифровой банк", size=11, color=ft.Colors.GREY_700),
+                        ft.Text("Личный цифровой банк", size=11, color=ui_color("muted")),
                     ],
                     spacing=0,
                 ),
-                build_sound_icon_button(),
+                ft.OutlinedButton(
+                    "Выключить звук" if is_sound_enabled() else "Включить звук",
+                    icon=ft.Icons.VOLUME_OFF if is_sound_enabled() else ft.Icons.VOLUME_UP,
+                    on_click=toggle_sound,
+                    style=ft.ButtonStyle(
+                        shape=ft.RoundedRectangleBorder(radius=14),
+                        color=ui_color("text"),
+                        bgcolor=ui_color("surface_alt"),
+                        side=ft.BorderSide(1, ui_color("border")),
+                    ),
+                ),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
 
         app_content = ft.Column([top_row, main_container, nav], expand=True, spacing=6)
-        page.add(mobile_shell(app_content))
-        nav.selected_index = 0
+        page.add(mobile_shell(app_content, shell_bg=ui_color("shell_surface"), outer_bg=ui_color("shell_outer"), shell_border=ui_color("shell_border")))
+        nav.selected_index = selected_index
         on_nav_change(None)
         page.update()
 
     def switch_to_auth():
+        sync_theme_controls()
         page.controls.clear()
         auth_stack.content = build_auth_card()
         auth_wrap = ft.Column([auth_stack], expand=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
-        page.add(mobile_shell(auth_wrap))
+        page.add(mobile_shell(auth_wrap, shell_bg=ui_color("shell_surface"), outer_bg=ui_color("shell_outer"), shell_border=ui_color("shell_border")))
         page.update()
 
     if state["user"]:
