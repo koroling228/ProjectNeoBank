@@ -110,8 +110,28 @@ def validate_email(email: str) -> Tuple[bool, str]:
     return True, ""
 
 
-def validate_phone(phone: str) -> Tuple[bool, str]:
+def normalize_phone(phone: str) -> str:
     phone = (phone or "").strip()
+    if not phone:
+        return ""
+
+    digits = re.sub(r"\D", "", phone)
+    if not digits:
+        return ""
+
+    if len(digits) == 10:
+        return "+7" + digits
+    if digits.startswith("8") and len(digits) >= 11:
+        return "+7" + digits[1:11]
+    if digits.startswith("7") and len(digits) >= 11:
+        return "+7" + digits[1:11]
+    if phone.startswith("+"):
+        return "+" + digits
+    return phone
+
+
+def validate_phone(phone: str) -> Tuple[bool, str]:
+    phone = normalize_phone(phone)
 
     if not phone:
         return False, "Введите номер телефона."
@@ -1007,7 +1027,7 @@ def seed_demo_if_empty():
         user_create("demo@example.com", "DemoPass1!", "Демо Пользователь")
         u = user_get_by_email("demo@example.com")
         if u:
-            user_update_profile(u["id"], "Демо Пользователь", "+7 (999) 111-22-33")
+            user_update_profile(u["id"], "Демо Пользователь", "+79991112233")
             user_update_balance(u["id"], 150000.0)
             mk_op(u["id"], "income", 50000, title="Зарплата")
             mk_op(u["id"], "expense", 1200, title="Кафе: кофе")
@@ -1077,6 +1097,7 @@ def main(page: ft.Page):
         "rates": fetch_rates(),
         "profile_edit": False,
         "auth_mode": "login",
+        "theme": "light",
     }
 
     LIGHT_PALETTE = {
@@ -1147,12 +1168,21 @@ def main(page: ft.Page):
         "nav_indicator": "#1D4ED8",
     }
 
+    def normalize_theme_value(theme_value: str) -> str:
+        value = (theme_value or "").strip().lower()
+        if value in ["dark", "тёмная", "темная", "dark mode"]:
+            return "dark"
+        return "light"
+
     def current_theme_name() -> str:
+        cached_theme = normalize_theme_value(state.get("theme", "light"))
         u = state.get("user")
         if u:
             settings = user_get_settings(u["id"])
-            return "dark" if settings.get("theme", "light") == "dark" else "light"
-        return "dark" if page.theme_mode == ft.ThemeMode.DARK else "light"
+            cached_theme = normalize_theme_value(settings.get("theme", cached_theme))
+            state["theme"] = cached_theme
+            return cached_theme
+        return cached_theme
 
     def is_dark_theme() -> bool:
         return current_theme_name() == "dark"
@@ -1275,6 +1305,33 @@ def main(page: ft.Page):
         except Exception:
             copy_to_clipboard(number, "Телефон скопирован")
 
+    reg_phone_normalizing = {"active": False}
+
+    def normalize_reg_phone(e):
+        if reg_phone_normalizing["active"]:
+            return
+
+        value = (e.control.value or "").strip()
+        if not value:
+            return
+
+        normalized = value
+        digits = re.sub(r"\D", "", value)
+
+        if value.startswith("8") and digits:
+            normalized = "+7" + digits[1:11]
+        elif digits.startswith("8") and not value.startswith("+"):
+            normalized = "+7" + digits[1:11]
+
+        if normalized != value:
+            reg_phone_normalizing["active"] = True
+            e.control.value = normalized[:12]
+            try:
+                e.control.update()
+            except Exception:
+                page.update()
+            reg_phone_normalizing["active"] = False
+
     login_email = ft.TextField(
         label="Email",
         width=320,
@@ -1306,6 +1363,7 @@ def main(page: ft.Page):
         allow=True,
         regex_string=r"^\+?\d{0,11}$",
         replacement_string=""),
+        on_change=normalize_reg_phone,
     )
     reg_pwd_tf = ft.TextField(
         label="Пароль",
@@ -1401,6 +1459,48 @@ def main(page: ft.Page):
     def apply_theme_from_settings():
         sync_theme_controls()
 
+    settings_change_guard = {"active": False}
+
+    def save_app_settings(e=None, show_toast: bool = True):
+        if settings_change_guard["active"]:
+            return
+
+        settings_change_guard["active"] = True
+        try:
+            u = state.get("user")
+            if not u:
+                return
+
+            selected_language = profile_lang_dd.value or "Русский"
+            selected_theme = normalize_theme_value(profile_theme_dd.value)
+            profile_theme_dd.value = selected_theme
+            state["theme"] = selected_theme
+
+            user_save_settings(
+                u["id"],
+                {
+                    "language": selected_language,
+                    "theme": selected_theme,
+                },
+            )
+
+            state["user"] = user_get_by_email(u["email"])
+            apply_theme_from_settings()
+            refresh_profile_view()
+            switch_to_home(nav.selected_index if nav.selected_index is not None else 2)
+            if show_toast:
+                toast("Настройки приложения обновлены")
+        finally:
+            settings_change_guard["active"] = False
+
+    def handle_live_settings_change(e=None):
+        if state.get("profile_edit") or settings_change_guard["active"]:
+            return
+        save_app_settings(show_toast=False)
+
+    profile_lang_dd.on_change = handle_live_settings_change
+    profile_theme_dd.on_change = handle_live_settings_change
+
     def is_sound_enabled() -> bool:
         u = state.get("user")
         if not u:
@@ -1437,12 +1537,14 @@ def main(page: ft.Page):
         profile_phone_tf.value = u.get("phone") or ""
         profile_account_tf.value = u.get("account") or ""
         profile_lang_dd.value = settings.get("language", "Русский")
-        profile_theme_dd.value = settings.get("theme", "light")
+        profile_theme_dd.value = normalize_theme_value(settings.get("theme", "light"))
 
         profile_name_tf.read_only = not edit_mode
         profile_phone_tf.read_only = not edit_mode
-        profile_lang_dd.disabled = False
-        profile_theme_dd.disabled = False
+        profile_email_tf.read_only = True
+        profile_account_tf.read_only = True
+        profile_lang_dd.disabled = not edit_mode
+        profile_theme_dd.disabled = not edit_mode
 
     def build_history_item(op: Dict[str, Any]):
         op_type = op.get("type", "")
@@ -1563,6 +1665,7 @@ def main(page: ft.Page):
 
         state["user"] = user_get_by_email(u["email"])
         u = state["user"]
+        state["theme"] = normalize_theme_value(user_get_settings(u["id"]).get("theme", "light"))
 
         apply_theme_from_settings()
 
@@ -1655,6 +1758,7 @@ def main(page: ft.Page):
             return
 
         state["user"] = u
+        state["theme"] = normalize_theme_value(user_get_settings(u["id"]).get("theme", "light"))
         switch_to_home()
 
     # ---- ИЗМЕНЕНО ТОЛЬКО ДЛЯ РАБОТЫ КНОПКИ "СОЗДАТЬ АККАУНТ" ----
@@ -1717,6 +1821,7 @@ def main(page: ft.Page):
             mk_op(u["id"], "income", 0, title="Регистрация")
 
             state["user"] = user_get_by_email(em)
+            state["theme"] = "light"
 
             reg_name_tf.value = ""
             reg_email_tf.value = ""
@@ -1971,31 +2076,19 @@ def main(page: ft.Page):
             return
 
         full_name = (profile_name_tf.value or "").strip()
-        phone = (profile_phone_tf.value or "").strip()
+        phone = normalize_phone(profile_phone_tf.value)
+        profile_phone_tf.value = phone
 
-        ok, msg = validate_phone(phone)
-        if not ok:
-            toast(msg)
-            return
-
-        selected_language = profile_lang_dd.value or "Русский"
-        selected_theme = profile_theme_dd.value or "light"
+        if phone:
+            ok, msg = validate_phone(phone)
+            if not ok:
+                toast(msg)
+                return
 
         user_update_profile(u["id"], full_name, phone)
-        user_save_settings(
-            u["id"],
-            {
-                "language": selected_language,
-                "theme": selected_theme,
-            },
-        )
-
         state["profile_edit"] = False
-        state["user"] = user_get_by_email(u["email"])
-        apply_theme_from_settings()
-        refresh_profile_view()
-        switch_to_home(nav.selected_index if nav.selected_index is not None else 2)
-        toast("Профиль обновлён")
+        save_app_settings(show_toast=False)
+        toast("Раздел «Профиль и настройки» обновлён")
 
     def toggle_profile_edit(e=None):
         state["profile_edit"] = not state.get("profile_edit", False)
@@ -2006,6 +2099,7 @@ def main(page: ft.Page):
     def logout_user(e=None):
         state["user"] = None
         state["profile_edit"] = False
+        state["theme"] = "light"
         login_pwd.value = ""
         switch_to_auth()
 
@@ -2947,7 +3041,7 @@ def main(page: ft.Page):
                             ft.Text("Настройки приложения", weight="bold"),
                             profile_lang_dd,
                             profile_theme_dd,
-                            ft.Text("Чтобы сменить тему, выберите вариант и нажмите «Сохранить».", size=12, color=ui_color("muted")),
+                            ft.Text("Изменения темы и языка сохраняются после нажатия «Сохранить» в разделе выше.", size=12, color=ui_color("muted")),
                         ],
                         spacing=10,
                     ),
