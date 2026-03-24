@@ -1380,6 +1380,55 @@ def main(page: ft.Page):
         prefix_icon=ft.Icons.LOCK_RESET,
     )
 
+    register_error_text = ft.Text(
+        "",
+        color=ft.Colors.RED_600,
+        size=12,
+        text_align=ft.TextAlign.CENTER,
+        visible=False,
+    )
+
+    def clear_register_errors(update: bool = True):
+        for field in [reg_name_tf, reg_email_tf, reg_phone_tf, reg_pwd_tf, reg_pwdc_tf]:
+            field.error_text = None
+        register_error_text.value = ""
+        register_error_text.visible = False
+        if update:
+            page.update()
+
+    def clear_single_error(e):
+        changed = False
+        if getattr(e.control, "error_text", None):
+            e.control.error_text = None
+            changed = True
+        if register_error_text.visible or register_error_text.value:
+            register_error_text.value = ""
+            register_error_text.visible = False
+            changed = True
+        if changed:
+            page.update()
+
+    def handle_reg_phone_change(e):
+        normalize_reg_phone(e)
+        clear_single_error(e)
+
+    def show_register_error(field, message: str):
+        clear_register_errors(update=False)
+        field.error_text = message
+        register_error_text.value = message
+        register_error_text.visible = True
+        try:
+            field.focus()
+        except Exception:
+            pass
+        page.update()
+
+    reg_name_tf.on_change = clear_single_error
+    reg_email_tf.on_change = clear_single_error
+    reg_phone_tf.on_change = handle_reg_phone_change
+    reg_pwd_tf.on_change = clear_single_error
+    reg_pwdc_tf.on_change = clear_single_error
+
     auth_stack = ft.Container(expand=True)
 
     deposits_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
@@ -1727,6 +1776,7 @@ def main(page: ft.Page):
 
     def switch_auth_mode(mode: str):
         state["auth_mode"] = mode
+        clear_register_errors(update=False)
         auth_stack.content = build_auth_card()
         page.update()
 
@@ -1769,35 +1819,38 @@ def main(page: ft.Page):
         pw = reg_pwd_tf.value or ""
         pwc = reg_pwdc_tf.value or ""
 
+        clear_register_errors(update=False)
+
         if not nm:
-            toast("Введите ФИО")
+            show_register_error(reg_name_tf, "Введите ФИО")
             return
 
         ok, msg = validate_email(em)
         if not ok:
-            toast(msg)
+            show_register_error(reg_email_tf, msg)
             return
 
         ok, msg = validate_phone(phone)
         if not ok:
-            toast(msg)
+            show_register_error(reg_phone_tf, msg)
             return
+        phone = normalize_phone(phone)
 
         if not pw:
-            toast("Введите пароль")
+            show_register_error(reg_pwd_tf, "Введите пароль")
             return
 
         if pw != pwc:
-            toast("Пароли не совпадают")
+            show_register_error(reg_pwdc_tf, "Пароли не совпадают")
             return
 
         ok, msg = validate_password(em, pw)
         if not ok:
-            toast(msg)
+            show_register_error(reg_pwd_tf, msg)
             return
 
         if user_get_by_email(em):
-            toast("Аккаунт уже существует")
+            show_register_error(reg_email_tf, "Аккаунт уже существует")
             return
 
         try:
@@ -1805,7 +1858,7 @@ def main(page: ft.Page):
             u = user_get_by_email(em)
 
             if not u:
-                toast("Не удалось создать аккаунт")
+                show_register_error(reg_email_tf, "Не удалось создать аккаунт")
                 return
 
             user_update_profile(u["id"], nm, phone)
@@ -1814,28 +1867,27 @@ def main(page: ft.Page):
                 {
                     "theme": "light",
                     "language": "Русский",
-                    "sound": "on",
                 },
             )
             user_update_balance(u["id"], 0.0)
             mk_op(u["id"], "income", 0, title="Регистрация")
 
             state["user"] = user_get_by_email(em)
-            state["theme"] = "light"
 
             reg_name_tf.value = ""
             reg_email_tf.value = ""
             reg_phone_tf.value = ""
             reg_pwd_tf.value = ""
             reg_pwdc_tf.value = ""
+            clear_register_errors(update=False)
 
             toast("Аккаунт создан")
             switch_to_home()
 
         except sqlite3.IntegrityError:
-            toast("Пользователь с таким email уже существует")
+            show_register_error(reg_email_tf, "Пользователь с таким email уже существует")
         except Exception as ex:
-            toast(f"Ошибка: {ex}")
+            show_register_error(reg_email_tf, f"Ошибка: {ex}")
 
     def do_register(e=None):
         do_register_direct()
@@ -1928,6 +1980,7 @@ def main(page: ft.Page):
                     reg_phone_tf,
                     reg_pwd_tf,
                     reg_pwdc_tf,
+                    register_error_text,
                     ft.ElevatedButton(
                         "Создать аккаунт",
                         icon=ft.Icons.PERSON_ADD_ALT_1,
