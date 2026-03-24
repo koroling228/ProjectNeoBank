@@ -1461,16 +1461,16 @@ def main(page: ft.Page):
     history_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=8, expand=True)
     assistant_state = {"path": [], "selected": None, "query": ""}
 
-    conv_amount = ft.TextField(label="Сумма", width=120, value="100", keyboard_type=ft.KeyboardType.NUMBER)
+    conv_amount = ft.TextField(label="Сумма", width=300, value="100", keyboard_type=ft.KeyboardType.NUMBER)
     conv_from = ft.Dropdown(
         label="Из",
-        width=95,
+        width=145,
         value="USD",
         options=[ft.dropdown.Option(k) for k in ["USD", "EUR", "CNY", "RUB"]],
     )
     conv_to = ft.Dropdown(
         label="В",
-        width=95,
+        width=145,
         value="RUB",
         options=[ft.dropdown.Option(k) for k in ["RUB", "USD", "EUR", "CNY"]],
     )
@@ -1583,6 +1583,20 @@ def main(page: ft.Page):
         settings = user_get_settings(u["id"])
         return settings.get("sound", "on") != "off"
 
+    def refresh_current_section():
+        idx = nav.selected_index if nav.selected_index is not None else 0
+
+        if idx == 0:
+            main_container.content = build_home_view()
+        elif idx == 1:
+            main_container.content = build_assistant_view()
+        elif idx == 2:
+            refresh_profile_view()
+            main_container.content = build_profile_view()
+        elif idx == 3:
+            main_container.content = build_history_view()
+            apply_history_filters()
+
     def toggle_sound(e=None):
         u = state.get("user")
         if not u:
@@ -1593,11 +1607,38 @@ def main(page: ft.Page):
         new_value = "off" if enabled else "on"
         user_save_settings(u["id"], {"sound": new_value})
         state["user"] = user_get_by_email(u["email"])
-
-        if nav.selected_index == 0:
-            main_container.content = build_home_view()
-        page.update()
         toast("Звук выключен" if new_value == "off" else "Звук включён")
+
+    def build_sound_toggle_button():
+        enabled = is_sound_enabled()
+
+        def build_button_content(is_enabled: bool):
+            return ft.Row(
+                [
+                    ft.Icon(ft.Icons.VOLUME_UP if is_enabled else ft.Icons.VOLUME_OFF, size=18, color=ui_color("text")),
+                    ft.Text("Выключить звук" if is_enabled else "Включить звук", color=ui_color("text"), weight="w600"),
+                ],
+                spacing=8,
+                tight=True,
+            )
+
+        button = ft.OutlinedButton(
+            content=build_button_content(enabled),
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=14),
+                color=ui_color("text"),
+                bgcolor=ui_color("surface_alt"),
+                side=ft.BorderSide(1, ui_color("border")),
+            ),
+        )
+
+        def handle_sound_button_click(e):
+            toggle_sound()
+            button.content = build_button_content(is_sound_enabled())
+            button.update()
+
+        button.on_click = handle_sound_button_click
+        return button
 
     def refresh_profile_view():
         u = state["user"]
@@ -2946,58 +2987,18 @@ def main(page: ft.Page):
 
     def build_home_view():
         u = state["user"]
-        settings = user_get_settings(u["id"]) if u else {"language": "Русский"}
         card = bank_card_widget(u.get("account", ""), u.get("balance", 0.0), ui_color("primary_card"))
-        sound_enabled = is_sound_enabled()
-
-        summary_tiles = ft.Row(
-            [
-                ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Text("Баланс", size=12, color=ui_color("muted")),
-                            ft.Text(f"{u.get('balance', 0.0):,.2f} RUB", weight="bold"),
-                        ],
-                        spacing=2,
-                    ),
-                    padding=12,
-                    bgcolor=ui_color("neutral_soft"),
-                    border_radius=16,
-                    expand=True,
-                ),
-                ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Text("Язык", size=12, color=ui_color("muted")),
-                            ft.Text(settings.get("language", "Русский"), weight="bold"),
-                        ],
-                        spacing=2,
-                    ),
-                    padding=12,
-                    bgcolor=ui_color("neutral_soft"),
-                    border_radius=16,
-                    expand=True,
-                ),
-            ],
-            spacing=10,
-        )
-
         quick_actions = ft.Container(
-            content=ft.Row(
-                [
-                    ft.ElevatedButton("Открыть вклад", icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog),
-                    ft.OutlinedButton("Обновить курсы", icon=ft.Icons.SYNC, on_click=update_rates),
-                ],
-                wrap=True,
-                spacing=8,
-            ),
+            content=ft.Container(height=0),
         )
 
         converter_card = ft.Container(
             content=ft.Column(
                 [
-                    ft.Row([ft.Text("Виджет конвертации валют", weight="bold"), ft.TextButton("Обновить курсы", on_click=update_rates)]),
-                    ft.Row([conv_amount, conv_from, conv_to], wrap=True, spacing=8),
+                    ft.Text("Виджет конвертации валют", weight="bold"),
+                    ft.TextButton("Обновить курсы", on_click=update_rates),
+                    conv_amount,
+                    ft.Row([conv_from, conv_to], spacing=8, wrap=False),
                     ft.ElevatedButton("Конвертировать", icon=ft.Icons.CURRENCY_EXCHANGE, on_click=do_convert),
                     conv_result,
                 ],
@@ -3056,7 +3057,6 @@ def main(page: ft.Page):
                 ft.Text("Главная", size=20, weight="bold"),
                 ft.Text("Баланс, вклады и быстрые действия в одном экране.", color=ui_color("muted")),
                 card,
-                summary_tiles,
                 quick_actions,
                 deposits_card,
                 converter_card,
@@ -3198,17 +3198,7 @@ def main(page: ft.Page):
                     ],
                     spacing=0,
                 ),
-                ft.OutlinedButton(
-                    "Выключить звук" if is_sound_enabled() else "Включить звук",
-                    icon=ft.Icons.VOLUME_OFF if is_sound_enabled() else ft.Icons.VOLUME_UP,
-                    on_click=toggle_sound,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=14),
-                        color=ui_color("text"),
-                        bgcolor=ui_color("surface_alt"),
-                        side=ft.BorderSide(1, ui_color("border")),
-                    ),
-                ),
+                build_sound_toggle_button(),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
