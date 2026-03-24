@@ -1277,6 +1277,32 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.update()
 
+    def open_modal(dialog):
+        try:
+            if hasattr(page, "open"):
+                page.open(dialog)
+                return
+        except Exception:
+            pass
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+
+    def close_modal(dialog=None):
+        target = dialog or getattr(page, "dialog", None)
+        if not target:
+            return
+        try:
+            if hasattr(page, "close"):
+                page.close(target)
+                return
+        except Exception:
+            pass
+        target.open = False
+        if getattr(page, "dialog", None) is target:
+            page.dialog = None
+        page.update()
+
     def copy_to_clipboard(value: str, ok_text: str):
         text = (value or "").strip()
         if not text:
@@ -2159,47 +2185,117 @@ def main(page: ft.Page):
     def show_password_dialog(e=None):
         u = state["user"]
         if not u:
+            toast("Сначала войдите")
             return
 
         old_tf = ft.TextField(label="Старый пароль", password=True, can_reveal_password=True, width=320)
         new_tf = ft.TextField(label="Новый пароль", password=True, can_reveal_password=True, width=320)
         confirm_tf = ft.TextField(label="Подтвердите новый пароль", password=True, can_reveal_password=True, width=320)
+        password_error_text = ft.Text("", color=ft.Colors.RED_600, size=12, visible=False)
+
+        dialog_ref = {"dialog": None}
+
+        def clear_password_errors(update: bool = True):
+            changed = False
+            for field in [old_tf, new_tf, confirm_tf]:
+                if field.error_text is not None:
+                    field.error_text = None
+                    changed = True
+            if password_error_text.visible or password_error_text.value:
+                password_error_text.value = ""
+                password_error_text.visible = False
+                changed = True
+            if update and changed:
+                try:
+                    if dialog_ref["dialog"] and dialog_ref["dialog"].open:
+                        page.update()
+                except Exception:
+                    page.update()
+
+        def clear_single_password_error(ev):
+            changed = False
+            if getattr(ev.control, "error_text", None):
+                ev.control.error_text = None
+                changed = True
+            if password_error_text.visible or password_error_text.value:
+                password_error_text.value = ""
+                password_error_text.visible = False
+                changed = True
+            if changed:
+                page.update()
+
+        def show_password_error(field, message: str):
+            clear_password_errors(update=False)
+            field.error_text = message
+            password_error_text.value = message
+            password_error_text.visible = True
+            try:
+                field.focus()
+            except Exception:
+                pass
+            page.update()
+
+        old_tf.on_change = clear_single_password_error
+        new_tf.on_change = clear_single_password_error
+        confirm_tf.on_change = clear_single_password_error
 
         def close_dialog(ev=None):
-            page.dialog.open = False
-            page.update()
+            close_modal(dialog_ref["dialog"])
 
         def do_change(ev):
             user = user_get_by_email(u["email"])
-
-            if user["password_hash"] != hash_password(old_tf.value or ""):
-                toast("Старый пароль введён неверно")
+            if not user:
+                show_password_error(old_tf, "Пользователь не найден")
                 return
 
-            if (new_tf.value or "") != (confirm_tf.value or ""):
-                toast("Новый пароль и подтверждение не совпадают")
+            old_password = old_tf.value or ""
+            new_password = new_tf.value or ""
+            confirm_password = confirm_tf.value or ""
+
+            if not old_password:
+                show_password_error(old_tf, "Введите старый пароль")
                 return
 
-            ok, msg = validate_password(user["email"], new_tf.value or "")
+            if user["password_hash"] != hash_password(old_password):
+                show_password_error(old_tf, "Старый пароль введён неверно")
+                return
+
+            if not new_password:
+                show_password_error(new_tf, "Введите новый пароль")
+                return
+
+            if new_password == old_password:
+                show_password_error(new_tf, "Новый пароль должен отличаться от старого")
+                return
+
+            if not confirm_password:
+                show_password_error(confirm_tf, "Подтвердите новый пароль")
+                return
+
+            if new_password != confirm_password:
+                show_password_error(confirm_tf, "Новый пароль и подтверждение не совпадают")
+                return
+
+            ok, msg = validate_password(user["email"], new_password)
             if not ok:
-                toast(msg)
+                show_password_error(new_tf, msg)
                 return
 
-            user_change_password(user["id"], new_tf.value or "")
+            user_change_password(user["id"], new_password)
             close_dialog()
             toast("Пароль успешно изменён")
 
         sync_form_control_theme(old_tf)
         sync_form_control_theme(new_tf)
         sync_form_control_theme(confirm_tf)
-        page.dialog = ft.AlertDialog(
+        dialog_ref["dialog"] = ft.AlertDialog(
+            modal=True,
             title=ft.Text("Смена пароля", color=ui_color("text")),
-            content=ft.Column([old_tf, new_tf, confirm_tf], tight=True, spacing=8),
+            content=ft.Column([old_tf, new_tf, confirm_tf, password_error_text], tight=True, spacing=8),
             actions=[ft.TextButton("Отмена", on_click=close_dialog), ft.ElevatedButton("Сохранить", on_click=do_change)],
             bgcolor=ui_color("surface"),
         )
-        page.dialog.open = True
-        page.update()
+        open_modal(dialog_ref["dialog"])
 
     def flatten_assistant_nodes(nodes, path_titles=None):
         path_titles = path_titles or []
@@ -2999,42 +3095,7 @@ def main(page: ft.Page):
         edit_mode = state.get("profile_edit", False)
         u = state["user"] or {}
         phone_value = u.get("phone") or ""
-        account_value = u.get("account") or ""
         email_value = u.get("email") or ""
-
-        contact_buttons = ft.Row(
-            [
-                ft.OutlinedButton(
-                    "Скопировать телефон",
-                    icon=ft.Icons.CONTENT_COPY,
-                    on_click=lambda e: copy_to_clipboard(phone_value, "Телефон скопирован"),
-                ),
-                ft.OutlinedButton(
-                    "Позвонить",
-                    icon=ft.Icons.CALL,
-                    on_click=lambda e: try_call_phone(phone_value),
-                ),
-            ],
-            wrap=True,
-            spacing=8,
-        )
-
-        account_buttons = ft.Row(
-            [
-                ft.OutlinedButton(
-                    "Скопировать email",
-                    icon=ft.Icons.ALTERNATE_EMAIL,
-                    on_click=lambda e: copy_to_clipboard(email_value, "Email скопирован"),
-                ),
-                ft.OutlinedButton(
-                    "Скопировать счет",
-                    icon=ft.Icons.CONTENT_COPY,
-                    on_click=lambda e: copy_to_clipboard(account_value, "Номер счета скопирован"),
-                ),
-            ],
-            wrap=True,
-            spacing=8,
-        )
 
         return ft.Column(
             [
@@ -3056,9 +3117,6 @@ def main(page: ft.Page):
                             profile_name_tf,
                             profile_email_tf,
                             profile_phone_tf,
-                            contact_buttons,
-                            profile_account_tf,
-                            account_buttons,
                         ],
                         spacing=10,
                     ),
