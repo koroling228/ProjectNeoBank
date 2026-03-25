@@ -1092,12 +1092,179 @@ def main(page: ft.Page):
     page.bgcolor = ft.Colors.BLACK
     page.theme_mode = ft.ThemeMode.LIGHT
 
+    def current_language() -> str:
+        settings = state.get("settings") or {}
+        return settings.get("language", "Русский")
+
+    TRANSLATIONS = {
+        "Главная": "Home",
+        "Помощник": "Assistant",
+        "Профиль": "Profile",
+        "История": "History",
+        "Личный цифровой банк": "Personal digital bank",
+        "Виджет конвертации валют": "Currency converter",
+        "Обновить курсы": "Update rates",
+        "Конвертировать": "Convert",
+        "Введите сумму и нажмите «Конвертировать».": "Enter an amount and click Convert.",
+        "Неверная сумма": "Invalid amount",
+        "Курсы недоступны": "Rates unavailable",
+        "Курсы обновлены": "Rates updated",
+        "Доступные вклады": "Available deposits",
+        "Открыть вклад": "Open deposit",
+        "Список продуктов со ставкой, сроком и минимальной суммой открытия.": "A list of products with rate, term, and minimum opening amount.",
+        "Срок": "Term",
+        "мес.": "mo.",
+        "Мин. сумма": "Min. amount",
+        "Профиль и настройки": "Profile & settings",
+        "Личные данные, безопасность и персонализация приложения.": "Personal data, security, and app personalization.",
+        "Личные данные": "Personal information",
+        "Редактировать": "Edit",
+        "Сохранить": "Save",
+        "Безопасность": "Security",
+        "Смена пароля с подтверждением старого значения.": "Password change with old password confirmation.",
+        "Сменить пароль": "Change password",
+        "Выйти из аккаунта": "Log out",
+        "Настройки приложения": "App settings",
+        "Измените язык или тему и нажмите «Сохранить».": "Change the language or theme and click Save.",
+        "Язык интерфейса": "Interface language",
+        "Тема оформления": "Theme",
+        "Светлая": "Light",
+        "Тёмная": "Dark",
+        "ФИО": "Full name",
+        "Телефон": "Phone",
+        "Номер основного счета": "Primary account number",
+        "Не указан": "Not specified",
+        "История операций": "Transaction history",
+        "Полная лента переводов, пополнений, расходов и операций по вкладам.": "Complete feed of transfers, top-ups, expenses, and deposit transactions.",
+        "Применить": "Apply",
+        "Сбросить": "Reset",
+        "Поиск": "Search",
+        "Например: зарплата, вклад, перевод, такси": "For example: salary, deposit, transfer, taxi",
+        "Дата от": "Date from",
+        "Дата до": "Date to",
+        "Тип операции": "Transaction type",
+        "Все": "All",
+        "Пополнение": "Income",
+        "Расход": "Expense",
+        "Перевод": "Transfer",
+        "Открытие вклада": "Deposit opening",
+        "Закрытие вклада": "Deposit closing",
+        "Начисление процентов": "Interest accrual",
+        "Сумма": "Amount",
+        "Из": "From",
+        "В": "To",
+        "Сумма от": "Amount from",
+        "Сумма до": "Amount to",
+        "Найдено операций": "Transactions found",
+        "Поступления": "Income",
+        "Списания": "Expenses",
+        "Накопительный": "Savings",
+        "Доходный": "Income",
+        "Короткий": "Short-term",
+        "Зарплата": "Salary",
+        "Кафе": "Cafe",
+        "кофе": "coffee",
+        "Продукты": "Groceries",
+        "супермаркет": "supermarket",
+        "Такси": "Taxi",
+        "транспорт": "transport",
+        "Регистрация": "Registration",
+        "Открытие вклада: ": "Deposit opening: ",
+        "Перевод на вклад ": "Transfer to deposit ",
+        "Активен": "Active",
+        "Закрыт": "Closed",
+        "Прибыль": "Profit",
+        "Сначала войдите": "Log in first",
+        "Открытие вклада": "Open deposit",
+        "Отмена": "Cancel",
+        "Открыть": "Open",
+        "Сумма (RUB)": "Amount (RUB)",
+        "Продукт не найден": "Product not found",
+        "Мин. сумма ": "Min. amount ",
+        "Пользователь не найден": "User not found",
+        "Недостаточно средств": "Insufficient funds",
+        "Вклад открыт": "Deposit opened",
+        "Раздел «Профиль и настройки» обновлён": "Profile & settings updated",
+        "Выключить звук": "Turn sound off",
+        "Включить звук": "Turn sound on",
+        "Звук выключен": "Sound off",
+        "Звук включён": "Sound on",
+        "Настройки приложения обновлены": "App settings updated",
+        "Ваши активные вклады": "Your active deposits",
+        "Вкладов пока нет": "No deposits yet",
+        "Баланс, вклады и быстрые действия в одном экране.": "Balance, deposits, and quick actions on one screen.",
+        "Цифровой помощник": "Digital assistant",
+        "Выберите нужный режим: интересующие вопросы или анализатор капитала.": "Choose the mode you need: common questions or capital analyzer.",
+        "Поиск по темам и подтемам": "Search by topics and subtopics",
+        "Например: вклад, пароль, комиссия": "For example: deposit, password, fee",
+        "Найти": "Search",
+        "Результаты поиска": "Search results",
+        "Тема не найдена": "Topic not found",
+        "Ниже показаны близкие разделы и связанные подтемы.": "Related sections and subtopics are shown below.",
+        "Пошаговая инструкция": "Step-by-step guide",
+        "Важные предупреждения": "Important warnings",
+        "Оценка последствий": "Impact assessment",
+        "Альтернативные варианты": "Alternative options",
+        "Выберите раздел": "Choose a section",
+        "Инструкция": "Guide",
+        "Раздел": "Section",
+        "Интересующие вопросы": "Common questions",
+        "Все существующие категории цифрового помощника: счета, вклады, карты, безопасность, грамотность и FAQ.": "All available digital assistant categories: accounts, deposits, cards, security, financial literacy, and FAQ.",
+        "Анализатор капитала": "Capital analyzer",
+        "Живой финансовый разбор за месяц: на что уходят деньги, где можно сократить расходы и какие есть риски по текущему балансу.": "A live monthly financial analysis: where your money goes, where you can cut expenses, and what risks your current balance has.",
+        "Наглядный разбор месячных расходов: куда уходят деньги, какие траты повторяются и где можно освободить часть бюджета.": "A clear breakdown of monthly expenses: where your money goes, which expenses repeat, and where part of the budget can be freed up.",
+        "Назад к выбору режима": "Back to mode selection",
+        "Пока недостаточно данных для анализа.": "Not enough data for analysis yet.",
+        "Общая картина за месяц": "Monthly overview",
+    }
+
+    TRANSLATIONS.update({'Управление счетом': 'Account management', 'Баланс, реквизиты, пополнение и базовые действия с основным счетом.': 'Balance, account details, top-ups, and basic actions with the main account.', 'Как посмотреть баланс': 'How to check balance', 'Где увидеть текущий баланс, номер счета и как правильно использовать эти данные.': 'Where to see the current balance, account number, and how to use this data correctly.', "Откройте раздел 'Главная' через нижнее меню приложения.": "Open the 'Home' section using the bottom navigation bar.", 'В верхней части экрана найдите карточку основного счета NeoBank.': 'Find the NeoBank main account card at the top of the screen.', 'На карточке проверьте текущий баланс, валюту отображения и номер счета.': 'Check the current balance, display currency, and account number on the card.', 'Если реквизиты нужны для перевода или пополнения, внимательно перепишите номер счета без ошибок.': 'If the account details are needed for a transfer or top-up, copy the account number carefully without mistakes.', "После входящих или исходящих операций дополнительно проверьте раздел 'История', чтобы понять, почему изменился остаток.": "After incoming or outgoing transactions, also check the 'History' section to understand why the balance changed.", 'Не отправляйте реквизиты счета в сомнительные чаты, формы и сообщения от неизвестных лиц.': 'Do not send account details in suspicious chats, forms, or messages from unknown people.', 'При работе через общественный Wi-Fi не показывайте баланс посторонним и не оставляйте приложение открытым.': 'When using public Wi-Fi, do not show your balance to strangers and do not leave the app open.', 'Регулярная проверка баланса помогает быстро замечать неожиданные списания и контролировать свободный остаток.': 'Regular balance checks help you quickly notice unexpected charges and keep track of available funds.', 'Точная сверка номера счета снижает риск ошибки при переводах и пополнениях.': 'Carefully verifying the account number reduces the risk of mistakes in transfers and top-ups.', 'Если нужно понять причину изменения суммы, откройте историю операций и сопоставьте последние записи.': 'If you need to understand why the amount changed, open the transaction history and compare the latest entries.', 'Если важен постоянный контроль, можно ориентироваться на историю доходов и расходов перед крупными платежами.': 'If ongoing control matters, use your income and expense history before making large payments.', 'Что можно сделать с основным счетом': 'What you can do with the main account', 'Развернутый обзор возможностей главного экрана и логики работы с деньгами на счете.': 'A detailed overview of the main screen features and how account money management works.', 'На главном экране сначала проверьте текущий остаток, чтобы понимать, какой суммой можно распоряжаться.': 'On the home screen, first check your current balance to know how much money is available.', 'Используйте номер счета для входящих переводов и пополнений из других банков или от другого человека.': 'Use the account number for incoming transfers and top-ups from other banks or another person.', "Если часть денег не нужна в ближайшее время, нажмите 'Открыть вклад' и переведите сумму в депозитный продукт.": "If part of your money will not be needed soon, tap 'Open deposit' and move the amount into a deposit product.", "Для анализа трат откройте раздел 'История' и изучите последние операции по счету.": "To analyze spending, open the 'History' section and review the latest account transactions.", 'Если нужно быстро понять эквивалент суммы в другой валюте, воспользуйтесь встроенным конвертером.': 'If you need to quickly see the equivalent amount in another currency, use the built-in converter.', 'Перед открытием вклада или крупным переводом всегда оставляйте запас денег на обязательные ежедневные расходы.': 'Before opening a deposit or making a large transfer, always keep some money aside for essential daily expenses.', 'Не расходуйте баланс полностью: часть средств может понадобиться на комиссии, подписки или неожиданные платежи.': 'Do not spend your entire balance: some funds may be needed for fees, subscriptions, or unexpected payments.', 'Грамотное распределение денег между счетом и вкладом помогает сохранить ликвидность и получать доход на свободный остаток.': 'Smart allocation between the account and a deposit helps preserve liquidity and earn income on free funds.', 'Если не следить за остатком, можно столкнуться с нехваткой средств в момент обязательного платежа.': 'If you do not monitor your balance, you may face a shortage of funds when a required payment is due.', 'Если не готовы размещать деньги на вкладе, временно оставьте резерв на основном счете и только потом принимайте решение.': 'If you are not ready to place money in a deposit yet, keep a reserve on the main account for now and decide later.', 'Если сомневаетесь, сначала изучите историю операций и свои регулярные траты за последние недели.': 'If you are unsure, first review your transaction history and regular spending over the past weeks.', 'Вклады и инвестиции': 'Deposits and investments', 'Открытие вклада, оценка доходности, риски досрочного закрытия и выбор подходящего продукта.': 'Opening a deposit, evaluating profitability, early closure risks, and choosing the right product.', 'Как открыть вклад': 'How to open a deposit', 'Пошаговая инструкция по открытию вклада и пояснение, что происходит после подтверждения операции.': 'Step-by-step instructions for opening a deposit and what happens after confirming the operation.', 'Перейдите на главный экран приложения и убедитесь, что на основном счете достаточно средств.': "Go to the app's home screen and make sure there are enough funds in the main account.", "Нажмите кнопку 'Открыть вклад' и изучите список доступных продуктов.": "Tap the 'Open deposit' button and review the list of available products.", 'Сравните ставку, срок, минимальную сумму и назначение каждого вклада.': 'Compare the rate, term, minimum amount, and purpose of each deposit.', 'Выберите подходящий вариант, введите сумму размещения и проверьте, что она не ниже минимального порога.': 'Choose a suitable option, enter the deposit amount, and make sure it is not below the minimum threshold.', 'Подтвердите открытие и дождитесь проверки остатка на основном счете.': 'Confirm the opening and wait for the main account balance to be checked.', 'После успешного создания вклада проверьте, что сумма списалась со счета, а сам вклад появился в списке активных продуктов.': 'After a deposit is successfully created, make sure the amount was deducted from the account and the deposit appears in the list of active products.', 'Если сумма ниже минимальной, система не позволит открыть вклад.': 'If the amount is below the minimum, the system will not allow you to open the deposit.', 'Если денег на счете недостаточно, операция будет отменена, поэтому не подтверждайте ее повторно без проверки остатка.': 'If there is not enough money in the account, the operation will be canceled, so do not confirm it again without checking the balance.', 'Перед размещением средств убедитесь, что часть денег остается доступной для повседневных расходов.': 'Before placing funds, make sure some money remains available for everyday expenses.', 'После открытия вклада свободный остаток на основном счете уменьшится на сумму размещения.': 'After opening a deposit, the available balance on the main account will decrease by the deposited amount.', 'В истории операций появится запись об открытии вклада, что поможет отслеживать движение средств.': 'A deposit opening record will appear in the transaction history, helping you track the movement of funds.', 'Деньги начнут работать по ставке выбранного продукта, но станут менее доступными до окончания срока.': "The money will start earning according to the selected product's rate, but it will become less accessible until the term ends.", 'Если пока не готовы замораживать крупную сумму, выберите продукт с меньшим минимальным порогом.': 'If you are not ready to lock in a large amount yet, choose a product with a lower minimum threshold.', 'Если денег недостаточно, сначала пополните счет или уменьшите сумму вклада.': 'If there is not enough money, top up the account first or reduce the deposit amount.', 'Как оценить доходность вклада': "How to evaluate a deposit's profitability", 'На что смотреть перед открытием вклада, чтобы выбрать не только высокую ставку, но и удобные условия.': 'What to look at before opening a deposit so you choose not only a high rate but also convenient conditions.', 'Сравните процентную ставку нескольких доступных вкладов и определите, какой продукт выглядит наиболее выгодным на первый взгляд.': 'Compare the interest rates of several available deposits and determine which product seems most attractive at first glance.', 'Проверьте срок размещения: чем он длиннее, тем важнее убедиться, что деньги не понадобятся раньше.': 'Check the placement term: the longer it is, the more important it is to be sure the money will not be needed earlier.', 'Оцените минимальную сумму входа и рассчитайте, сколько средств останется на основном счете после открытия.': 'Evaluate the minimum entry amount and calculate how much money will remain in the main account after opening.', 'Подумайте, какая цель у вклада: сохранить резерв, накопить на цель или получить максимальный доход.': 'Think about the goal of the deposit: keep a reserve, save for a goal, or get maximum income.', 'Принимайте решение не только по ставке, но и по удобству доступа к деньгам в течение срока.': 'Make your decision not only based on the rate, but also on how convenient access to the money will be during the term.', 'Высокая ставка не всегда выгоднее, если деньги могут понадобиться до окончания вклада.': 'A high rate is not always better if the money may be needed before the deposit ends.', 'Нельзя размещать весь доступный остаток, если у вас нет финансовой подушки на срочные расходы.': 'Do not place your entire available balance if you do not have an emergency cushion for urgent expenses.', 'Чем больше сумма и срок вклада, тем выше потенциальный доход, но тем меньше гибкость в управлении деньгами.': 'The larger the amount and the longer the term, the higher the potential income, but the less flexibility you have in managing your money.', 'Если выбрать неподходящий срок, может появиться соблазн закрыть вклад досрочно и потерять часть выгоды.': 'If you choose an unsuitable term, you may be tempted to close the deposit early and lose part of the benefit.', 'Часть средств можно оставить на основном счете как резерв, а часть разместить на вкладе.': 'You can keep part of the funds in the main account as a reserve and place the rest in a deposit.', 'Если важнее доступ к деньгам, лучше выбрать более короткий срок даже при немного меньшей ставке.': 'If access to money matters more, it is better to choose a shorter term even with a slightly lower rate.', 'Досрочное закрытие вклада': 'Early deposit closure', 'Что произойдет, если закрыть вклад раньше срока, и как принять решение без лишних потерь.': 'What happens if you close a deposit before maturity and how to make the decision with minimal losses.', 'Сначала оцените, действительно ли деньги нужны немедленно, или можно покрыть расход из свободного остатка на основном счете.': 'First assess whether the money is really needed immediately or whether the expense can be covered from the available balance in the main account.', 'Проверьте сумму вклада, срок его окончания и ожидаемую выгоду, которую вы потеряете при досрочном закрытии.': 'Check the deposit amount, its end date, and the expected benefit you will lose if you close it early.', 'Сравните текущую потребность в деньгах с потенциальной потерей процентов.': 'Compare your current need for money with the potential loss of interest.', 'Если решение о закрытии неизбежно, после операции проверьте, что средства вернулись на основной счет и отразились в истории.': 'If closing is unavoidable, after the operation make sure the funds returned to the main account and appeared in the history.', 'На будущее пересмотрите размер финансовой подушки, чтобы не разрывать вклад из-за срочных трат.': 'For the future, reconsider the size of your emergency fund so you do not have to break a deposit because of urgent expenses.', 'При досрочном закрытии пользователь может потерять часть начисленных процентов или весь ожидаемый доход по продукту.': 'With early closure, the user may lose part of the accrued interest or all expected income from the product.', 'Раннее закрытие вклада снижает итоговую выгоду и может сорвать финансовую цель, ради которой он открывался.': 'Early closure reduces the final benefit and may disrupt the financial goal for which the deposit was opened.', 'Средства вернутся в более ликвидную форму и снова станут доступны для повседневных расходов.': 'The funds will return to a more liquid form and become available again for daily expenses.', 'Доходность вклада снизится, а накопительный эффект окажется меньше, чем планировалось.': 'The profitability of the deposit will decrease, and the accumulation effect will be smaller than planned.', 'Если такие ситуации повторяются, значит стратегия распределения денег между счетом и вкладом выбрана неудачно.': 'If such situations repeat, it means the strategy of distributing money between the account and the deposit has been chosen poorly.', 'Если возможно, дождитесь окончания срока вклада и перенесите необязательные траты.': 'If possible, wait until the deposit term ends and postpone non-essential spending.', 'Для будущих накоплений выбирайте более короткий срок или размещайте меньшую сумму, чтобы сохранить запас ликвидности.': 'For future savings, choose a shorter term or place a smaller amount to preserve liquidity.', 'Карты и платежи': 'Cards and payments', 'Переводы, лимиты, комиссии и действия при потере или компрометации карты.': 'Transfers, limits, fees, and what to do if a card is lost or compromised.', 'Как перевести деньги': 'How to transfer money', 'Развернутая инструкция по безопасному переводу средств и проверке реквизитов перед отправкой.': 'Detailed instructions for safely transferring funds and checking details before sending.', 'Откройте раздел с платежами или подготовьте реквизиты основного счета, если перевод выполняется через банковские данные.': 'Open the payments section or prepare the main account details if the transfer is made using bank data.', 'Выберите способ перевода: по номеру счета, карте, телефону или по другим доступным реквизитам.': 'Choose the transfer method: by account number, card, phone, or other available details.', 'Внимательно введите данные получателя и сумму операции.': "Carefully enter the recipient's details and the transaction amount.", 'Перед подтверждением еще раз сверьте реквизиты, имя получателя и итоговую сумму списания.': 'Before confirming, check the details, recipient name, and final debit amount once again.', 'Убедитесь, что на счете достаточно средств с учетом возможной комиссии или округления суммы.': 'Make sure there are enough funds in the account, taking into account any possible fee or rounding.', 'После отправки проверьте историю операций, чтобы убедиться, что перевод успешно проведен и не был отправлен дважды.': 'After sending, check the transaction history to make sure the transfer was completed successfully and was not sent twice.', 'Если перевод крупный, сохраните чек или зафиксируйте основные детали операции для последующей сверки.': 'If the transfer is large, save the receipt or note the key transaction details for later verification.', 'Ошибку в реквизитах после подтверждения исправить сложно, поэтому перепроверка обязательна.': 'It is difficult to fix mistakes in the details after confirmation, so rechecking is essential.', 'Не переводите деньги незнакомым людям под давлением, угрозами или обещаниями срочной выгоды.': 'Do not transfer money to strangers under pressure, threats, or promises of urgent profit.', 'Если экран долго обновляется, не нажимайте кнопку подтверждения повторно без проверки истории.': 'If the screen is taking a long time to update, do not press the confirm button again without checking the history.', 'Корректно оформленный перевод быстро отразится в истории операций и уменьшит баланс на счете на сумму платежа.': 'A correctly completed transfer will quickly appear in the transaction history and reduce the account balance by the payment amount.', 'Ошибка в реквизитах может привести к отправке денег другому получателю и сложной процедуре возврата.': 'A mistake in the details may result in money being sent to another recipient and a difficult refund process.', 'Если боитесь ошибиться в длинных реквизитах, используйте более простой способ перевода, например по номеру телефона или QR-коду, если он доступен.': 'If you are afraid of making a mistake in long details, use a simpler transfer method, such as by phone number or QR code, if available.', 'Для крупных сумм сначала отправьте небольшую тестовую сумму, а затем основной перевод.': 'For large amounts, first send a small test amount and then the main transfer.', 'Как действовать при утере карты': 'What to do if you lose your card', 'Что делать, если карта потеряна, украдена или ее данные могли попасть к мошенникам.': 'What to do if the card is lost, stolen, or its details may have been obtained by fraudsters.', 'Сразу прекратите любые попытки оплаты по карте и ограничьте ее использование через доступные инструменты безопасности.': 'Immediately stop all attempts to pay with the card and restrict its use through available security tools.', 'Проверьте последние операции в истории и обратите внимание на незнакомые списания.': 'Check the latest transactions in the history and pay attention to unfamiliar charges.', 'Если видите подозрительные операции, зафиксируйте их сумму, время и описание.': 'If you see suspicious transactions, note their amount, time, and description.', 'Смените пароль от аккаунта, если есть риск, что злоумышленники получили доступ не только к карте, но и к приложению.': 'Change your account password if there is a risk that attackers have gained access not only to the card, but also to the app.', 'После блокировки продумайте дальнейшие действия: перевыпуск карты, смену пароля и обращение в поддержку.': 'After blocking the card, think through the next steps: reissuing the card, changing the password, and contacting support.', 'Пока ситуация не прояснится, пользуйтесь только проверенными устройствами и безопасными каналами связи.': 'Until the situation is clarified, use only trusted devices and secure communication channels.', 'После получения новой карты проверьте, обновились ли данные для регулярных платежей и подписок.': 'After receiving a new card, check whether the details for recurring payments and subscriptions have been updated.', 'Не передавайте CVV, PIN-код и одноразовые коды подтверждения третьим лицам, даже если они представляются сотрудниками банка.': 'Do not share the CVV, PIN code, or one-time confirmation codes with third parties, even if they claim to be bank employees.', 'Чем дольше карта остается активной после потери, тем выше риск несанкционированных списаний.': 'The longer the card remains active after being lost, the higher the risk of unauthorized charges.', 'Быстрая блокировка снижает риск потери денег и останавливает дальнейшие попытки списания.': 'Fast blocking reduces the risk of losing money and stops further debit attempts.', 'Промедление может привести к серии операций, которые будет значительно сложнее оспорить.': 'Delay can lead to a series of transactions that will be much harder to dispute.', 'Если карта не потеряна, а платеж не проходит, сначала проверьте лимиты и доступный баланс.': 'If the card is not lost but the payment does not go through, first check the limits and available balance.', 'Если проблема только в подозрении на компрометацию, после блокировки сразу смените пароль от аккаунта.': 'If the issue is only suspected compromise, change the account password immediately after blocking the card.', 'Лимиты и комиссии': 'Limits and fees', 'Как учитывать скрытые расходы и ограничения перед оплатой или переводом.': 'How to account for hidden costs and restrictions before making a payment or transfer.', 'Перед любой операцией уточните точную сумму и ее назначение: покупка, перевод или другая форма платежа.': 'Before any operation, clarify the exact amount and its purpose: purchase, transfer, or another type of payment.', 'Проверьте, хватает ли денег на основном счете не только на сам платеж, но и на возможную комиссию.': 'Check whether there is enough money in the main account not only for the payment itself but also for any possible fee.', 'Если операция не проходит, сравните сумму с доступным балансом и проверьте, не превышен ли лимит по продукту.': 'If the operation does not go through, compare the amount with the available balance and check whether the product limit has been exceeded.', 'После неудачной попытки обязательно откройте историю операций, чтобы убедиться, что деньги не списались частично или дважды.': 'After a failed attempt, be sure to open the transaction history to make sure the money was not charged partially or twice.', 'При крупных платежах заранее оставляйте небольшой запас средств на счете.': 'For large payments, leave a small reserve of funds in the account in advance.', "Комиссии уменьшают фактический остаток на счете, поэтому опасно расходовать баланс полностью 'в ноль'.": 'Fees reduce the actual balance in the account, so it is risky to spend the balance completely down to zero.', 'Повторное подтверждение платежа без проверки истории может создать дублирующие попытки списания.': 'Confirming a payment again without checking the history may create duplicate debit attempts.', 'Понимание лимитов и комиссий снижает число отклоненных платежей и неприятных сюрпризов после списания.': 'Understanding limits and fees reduces the number of declined payments and unpleasant surprises after the debit.', 'Если не учитывать дополнительные расходы, можно случайно уйти в дефицит свободного остатка.': 'If you do not account for additional costs, you may accidentally run short of available funds.', 'Если платеж слишком велик, попробуйте разбить его на части или перенести часть суммы на другой день.': 'If the payment is too large, try splitting it into parts or moving part of the amount to another day.', 'При недостатке средств сначала пополните счет, а затем повторяйте операцию.': 'If there are not enough funds, top up the account first and then try the operation again.', 'Пароль, защита аккаунта, распознавание мошенничества и безопасные привычки пользователя.': 'Password, account protection, fraud awareness, and safe user habits.', 'Как сменить пароль': 'How to change your password', 'Пошаговая инструкция по обновлению пароля и правила выбора надежной комбинации.': 'Step-by-step instructions for updating your password and choosing a strong combination.', "Откройте раздел 'Профиль' и перейдите в блок безопасности аккаунта.": "Open the 'Profile' section and go to the account security block.", 'Введите текущий пароль, а затем дважды укажите новый, чтобы избежать опечатки.': 'Enter your current password and then enter the new one twice to avoid typos.', 'Проверьте, что новый пароль содержит не менее 8 символов, заглавные и строчные буквы, цифры и специальный символ.': 'Check that the new password contains at least 8 characters, uppercase and lowercase letters, digits, and a special symbol.', 'Не используйте в качестве пароля email, очевидные комбинации и уже скомпрометированные старые варианты.': 'Do not use your email, obvious combinations, or previously compromised passwords as your password.', 'После сохранения изменений убедитесь, что вход с новым паролем работает корректно.': 'After saving the changes, make sure sign-in with the new password works correctly.', 'Выйдите из аккаунта на чужих или старых устройствах, если раньше вход выполнялся с них.': 'Sign out of your account on other or old devices if you previously signed in on them.', 'Обновите сохраненный пароль в менеджере паролей, если вы им пользуетесь, чтобы не путаться при следующем входе.': 'Update the saved password in your password manager, if you use one, to avoid confusion next time you sign in.', 'Слабый пароль повышает риск подбора и несанкционированного доступа к аккаунту.': 'A weak password increases the risk of guessing and unauthorized access to the account.', 'Нельзя хранить пароль в открытом виде в заметках, сообщениях или на бумаге рядом с устройством.': 'Do not store your password in plain text in notes, messages, or on paper near the device.', 'После смены пароля старые учетные данные становятся недействительными, что повышает безопасность аккаунта.': 'After changing the password, old credentials become invalid, which improves account security.', 'Уникальный сложный пароль заметно снижает риск взлома через перебор и социальную инженерию.': 'A unique complex password significantly reduces the risk of hacking through brute force and social engineering.', 'Если сложно запомнить надежный пароль, используйте менеджер паролей.': 'If it is hard to remember a strong password, use a password manager.', 'Если есть подозрение на утечку данных, смените пароль сразу, не дожидаясь подтверждения проблемы.': 'If there is any suspicion of a data leak, change your password immediately without waiting for confirmation.', 'Правила безопасного использования': 'Rules for safe use', 'Памятка по ежедневной защите учетной записи, карты и личных данных пользователя.': "A reminder on daily protection of the user's account, card, and personal data.", 'Используйте сложный уникальный пароль и регулярно меняйте его при первых признаках компрометации.': 'Use a complex unique password and change it as soon as there are signs of compromise.', 'Никому не сообщайте одноразовые коды, PIN-код, CVV и другие чувствительные данные карты.': 'Never tell anyone one-time codes, your PIN, CVV, or other sensitive card data.', 'Регулярно просматривайте историю операций, чтобы замечать необычные списания как можно раньше.': 'Review the transaction history regularly to notice unusual charges as early as possible.', 'Не переходите по сомнительным ссылкам из писем, мессенджеров и фальшивых страниц входа.': 'Do not follow suspicious links from emails, messengers, or fake sign-in pages.', 'При подозрительной активности сразу меняйте пароль и ограничивайте доступ к карте и аккаунту.': 'If you notice suspicious activity, change your password immediately and restrict access to the card and account.', 'Сотрудники банка не запрашивают PIN-код, CVV и одноразовые коды подтверждения в переписке или по телефону.': 'Bank employees do not ask for your PIN, CVV, or one-time confirmation codes in messages or over the phone.', 'Даже единичная передача кода подтверждения может открыть мошенникам доступ к деньгам.': 'Even sharing a single confirmation code can give fraudsters access to your money.', 'Соблюдение базовых правил безопасности резко снижает риск потери денег и данных.': 'Following basic security rules sharply reduces the risk of losing money and data.', 'Игнорирование признаков фишинга может привести к взлому аккаунта и цепочке несанкционированных операций.': 'Ignoring signs of phishing can lead to account compromise and a chain of unauthorized transactions.', 'Если не уверены в сообщении или звонке, прекратите контакт и самостоятельно перепроверьте ситуацию через официальный канал банка.': "If you are unsure about a message or call, stop the contact and verify the situation yourself through the bank's official channel.", 'Если получили подозрительную ссылку, лучше вообще не открывать ее и сразу удалить сообщение.': 'If you receive a suspicious link, it is better not to open it at all and delete the message immediately.', 'Как начать вести бюджет': 'How to start budgeting', 'Простой способ контролировать доходы и расходы, используя историю операций как основу для анализа.': 'A simple way to control income and expenses using transaction history as the basis for analysis.', "Регулярно открывайте раздел 'История операций' и анализируйте движения денег хотя бы раз в неделю.": "Regularly open the 'Transaction history' section and analyze money movements at least once a week.", 'Разделяйте расходы на обязательные и необязательные: жилье, еда, транспорт, подписки, развлечения и другие категории.': 'Divide expenses into essential and non-essential: housing, food, transport, subscriptions, entertainment, and other categories.', 'Сравнивайте суммарные расходы с доходами за выбранный период, чтобы понимать реальный финансовый баланс.': 'Compare total expenses with income for the selected period to understand your real financial balance.', 'Определите одну-две категории, в которых можно сократить траты без сильного ущерба для качества жизни.': 'Identify one or two categories where spending can be reduced without greatly affecting your quality of life.', 'Часть освободившихся денег направляйте в накопления или на вклад.': 'Direct part of the freed-up money into savings or a deposit.', 'Без анализа истории операций сложно заметить мелкие, но регулярные траты, которые постепенно съедают бюджет.': 'Without analyzing transaction history, it is hard to notice small but regular expenses that gradually eat up the budget.', 'Слишком жесткие ограничения часто приводят к срыву, поэтому корректируйте расходы постепенно.': 'Overly strict limits often lead to burnout, so adjust your spending gradually.', 'Появится ясная картина того, куда уходят деньги и сколько реально можно откладывать каждый месяц.': 'You will get a clear picture of where your money goes and how much you can realistically save each month.', 'Контроль бюджета помогает избежать кассовых разрывов и необдуманных импульсивных трат.': 'Budget control helps avoid cash gaps and impulsive spending.', 'Если полный анализ пока кажется сложным, начните хотя бы с контроля самых крупных категорий расходов.': 'If a full analysis seems too difficult for now, start by tracking the largest spending categories.', 'Можно вести бюджет по неделям, а не по месяцам, если так проще отслеживать привычки.': 'You can keep a budget by weeks instead of months if that makes habits easier to track.', 'Как копить на цель': 'How to save for a goal', 'Пошаговый подход к накоплению нужной суммы без чрезмерной нагрузки на ежедневный бюджет.': 'A step-by-step approach to saving the required amount without excessive pressure on your daily budget.', 'Определите точную сумму цели и дату, к которой хотите ее достичь.': 'Define the exact goal amount and the date by which you want to achieve it.', 'Разделите сумму на количество месяцев или недель до цели, чтобы рассчитать комфортный регулярный взнос.': 'Divide the amount by the number of months or weeks until the goal to calculate a comfortable regular contribution.', 'После каждого поступления денег сначала откладывайте рассчитанную часть, а уже потом распределяйте остальной бюджет.': 'After each incoming payment, set aside the calculated part first and only then distribute the remaining budget.', 'Следите за прогрессом и при необходимости корректируйте размер взноса в зависимости от доходов и расходов.': 'Track your progress and adjust the contribution amount if needed depending on income and expenses.', 'Если часть денег точно не понадобится в ближайшее время, рассмотрите размещение на вкладе для дополнительного дохода.': 'If part of the money definitely will not be needed soon, consider placing it in a deposit for additional income.', 'Не ставьте нереалистично высокий ежемесячный взнос: это часто приводит к срыву накопительного плана.': 'Do not set an unrealistically high monthly contribution: it often leads to breaking the savings plan.', 'Не размещайте на долгий срок деньги, которые могут понадобиться срочно.': 'Do not lock away for a long period money that may be needed urgently.', 'Четкий график накоплений делает достижение цели предсказуемым и снижает количество импульсивных трат.': 'A clear savings schedule makes achieving the goal more predictable and reduces impulsive spending.', 'Использование вклада для части суммы может ускорить накопление за счет процентов.': 'Using a deposit for part of the amount can accelerate savings through interest.', 'Если ежемесячный взнос получается слишком большим, увеличьте срок цели или сократите необязательные расходы.': 'If the monthly contribution is too large, extend the timeline for the goal or reduce non-essential expenses.', 'Можно разбить большую цель на несколько промежуточных этапов, чтобы видеть прогресс быстрее.': 'A large goal can be broken into several intermediate stages so you can see progress sooner.', 'Что такое процентная ставка': 'What is an interest rate', 'Простое объяснение, как работает ставка по вкладу и почему она не должна быть единственным критерием выбора.': 'A simple explanation of how a deposit rate works and why it should not be the only selection criterion.', 'Процентная ставка показывает, какой доход банк начисляет за размещение ваших денег на определенный срок.': 'The interest rate shows what income the bank credits for placing your money for a certain period.', 'Чем выше ставка и сумма вклада, тем больше потенциальный доход, если вклад сохраняется до конца срока.': 'The higher the rate and deposit amount, the greater the potential income if the deposit is kept until the end of the term.', 'При оценке выгоды учитывайте не только ставку, но и срок вклада, минимальную сумму и доступность денег в течение этого времени.': 'When evaluating the benefit, consider not only the rate but also the term, minimum amount, and the availability of the money during that time.', 'Сравнивайте несколько продуктов: иногда немного меньшая ставка оказывается удобнее из-за более гибких условий.': 'Compare several products: sometimes a slightly lower rate is more convenient because of more flexible terms.', 'Рассматривайте ставку как один из параметров, а не как единственный показатель пользы продукта.': "Treat the rate as one parameter, not the only indicator of a product's usefulness.", 'Ориентироваться только на цифру ставки опасно: ограничения по сроку и досрочному закрытию могут сделать продукт менее удобным.': 'Focusing only on the rate number is risky: term and early closure limits may make the product less convenient.', 'Если игнорировать условия доступа к деньгам, можно потерять часть выгоды при вынужденном закрытии вклада.': 'If you ignore access conditions to the money, you may lose part of the benefit when forced to close the deposit.', 'Понимание процентной ставки помогает осознанно выбирать вклад, а не ориентироваться только на рекламу и громкие обещания доходности.': 'Understanding the interest rate helps you choose a deposit consciously instead of relying only on ads and loud promises of profitability.', 'Чем лучше вы понимаете механику ставки, тем легче сравнивать продукты и планировать накопления.': 'The better you understand how the rate works, the easier it is to compare products and plan savings.', 'Если цель — не максимальный доход, а гибкий резерв, допускается выбор продукта с меньшей ставкой, но более удобными условиями.': 'If the goal is not maximum income but a flexible reserve, choosing a product with a lower rate but more convenient conditions is acceptable.', 'Для учебного понимания сравните несколько вкладов по ставке, сроку и итоговой выгоде на одной и той же сумме.': 'For learning purposes, compare several deposits by rate, term, and final benefit using the same amount.', 'Что означает банковская операция в истории': 'What a banking operation in history means', 'Как понимать записи в истории и находить связь между типом операции и изменением баланса.': 'How to understand history entries and find the link between the operation type and balance changes.', 'Посмотрите, относится ли запись к пополнению, переводу, расходу, открытию вклада, начислению процентов или другой операции.': 'See whether the entry refers to a top-up, transfer, expense, deposit opening, interest accrual, or another operation.', 'Сопоставьте время операции с изменением баланса, чтобы понять, как именно она повлияла на счет.': 'Compare the transaction time with the balance change to understand exactly how it affected the account.', 'Если запись связана со вкладом, дополнительно проверьте список активных вкладов и соседние операции в истории.': 'If the entry is related to a deposit, also check the list of active deposits and nearby transactions in the history.', 'При появлении незнакомого списания перепроверьте контекст сразу, а не откладывайте проверку на потом.': 'If an unfamiliar charge appears, recheck the context immediately instead of putting it off.', 'Если операция выглядит незнакомой, не игнорируйте ее: ранняя проверка повышает шанс быстро заметить проблему.': 'If an operation looks unfamiliar, do not ignore it: early checking increases the chance of spotting a problem quickly.', 'Соседние записи в истории часто объясняют контекст, поэтому не оценивайте одну операцию изолированно.': 'Nearby history entries often explain the context, so do not judge one operation in isolation.', 'Понимание истории операций помогает увереннее контролировать личные финансы и быстрее распознавать ошибки или подозрительную активность.': 'Understanding transaction history helps you control your personal finances more confidently and recognize mistakes or suspicious activity more quickly.', 'Регулярная проверка ленты уменьшает риск пропустить важное списание или начисление.': 'Regularly checking the feed reduces the risk of missing an important charge or accrual.', 'Если непонятно значение операции, используйте поиск в помощнике по ключевым словам из ее названия.': 'If the meaning of an operation is unclear, use the assistant search with keywords from its title.', 'Можно также сравнить запись с недавними действиями: переводами, открытием вклада или расходами по карте.': 'You can also compare the entry with recent actions: transfers, deposit opening, or card expenses.', 'Как пользоваться поиском в помощнике': 'How to use the assistant search', 'Как быстро найти нужную тему, если не хочется переходить по карточкам вручную.': 'How to quickly find the topic you need if you do not want to navigate through cards manually.', "В верхней части раздела 'Помощник' начните вводить вопрос, тему или короткое ключевое слово.": "At the top of the 'Assistant' section, start typing a question, topic, or short keyword.", 'Система ищет совпадения по названиям тем, подтем, ключевым словам и связанным инструкциям.': 'The system searches for matches in topic titles, subtopics, keywords, and related instructions.', 'Если видите подходящий результат, нажмите на него, чтобы сразу открыть нужный раздел.': 'If you see a suitable result, tap it to open the needed section right away.', "Если результат не найден, сократите запрос до одного-двух слов, например: 'вклад', 'пароль', 'комиссия'.": "If no result is found, shorten the query to one or two words, for example: 'deposit', 'password', 'fee'.", 'При необходимости воспользуйтесь похожими темами, которые предлагаются внизу экрана.': 'If needed, use the related topics suggested at the bottom of the screen.', 'Слишком длинные и разговорные запросы могут искать хуже, чем короткие формулировки с ключевыми словами.': 'Very long conversational queries may work worse than short keyword-based phrases.', 'Если нет точного совпадения, не прекращайте поиск сразу — смежные темы часто содержат нужный ответ.': 'If there is no exact match, do not stop searching right away — related topics often contain the answer you need.', 'Поиск экономит время и позволяет сразу попасть в нужную инструкцию без долгой навигации по дереву разделов.': 'Search saves time and lets you jump straight to the right instruction without navigating the section tree for long.', 'Использование похожих тем снижает вероятность того, что пользователь останется без ответа.': 'Using related topics reduces the chance that the user will be left without an answer.', 'Если не знаете, как сформулировать запрос, начните с одной из основных карточек категорий.': 'If you do not know how to phrase the query, start with one of the main category cards.', "Можно искать не целым вопросом, а по ключевому действию: 'пополнить', 'закрыть', 'сменить пароль'.": "You can search not by a full question, but by a key action: 'top up', 'close', 'change password'.", 'Управление бюджетом': 'Budget management', 'Умный контроль регулярных трат, мягкие рекомендации и предупреждения о перерасходе.': 'Smart monitoring of regular spending, gentle recommendations, and overspending warnings.', 'Помощник анализирует историю операций и автоматически выделяет повторяющиеся категории расходов: подписки, кафе, такси, продукты и другие траты.': 'The assistant analyzes transaction history and automatically highlights recurring expense categories: subscriptions, cafes, taxis, groceries, and other spending.', 'На основе повторяющихся списаний он показывает понятные выводы, например: «Вы тратите на кафе примерно 8 000 ₽ в месяц». ': "Based on recurring charges, it shows clear conclusions, for example: 'You spend about 8,000 RUB per month on cafes.' ", 'Если по категории видно устойчивый перерасход, помощник предлагает мягкую корректировку без давления, например: «Если сократить эту категорию на 20%, можно откладывать ещё 1 600 ₽». ': "If persistent overspending is visible in a category, the assistant suggests a gentle adjustment without pressure, for example: 'If you reduce this category by 20%, you could save another 1,600 RUB.' ", 'Раз в неделю пользователь получает короткий отчёт по основным расходам, динамике трат и категориям, которые выросли сильнее всего.': 'Once a week, the user receives a short report on key expenses, spending trends, and the categories that grew the most.', 'Если расходы начинают выходить за привычные рамки, помощник заранее предупреждает о перерасходе и предлагает пересмотреть необязательные платежи.': 'If expenses begin to exceed the usual range, the assistant warns about overspending in advance and suggests reviewing non-essential payments.', 'Даже небольшие регулярные траты могут незаметно съедать значительную часть месячного бюджета.': 'Even small regular expenses can quietly eat up a significant part of the monthly budget.', 'Без еженедельного контроля пользователь часто замечает перерасход слишком поздно, когда деньги уже потрачены.': 'Without weekly monitoring, the user often notices overspending too late, when the money has already been spent.', 'Автокатегоризация расходов помогает быстро понять, куда уходит большая часть денег.': 'Automatic expense categorization helps you quickly understand where most of your money goes.', 'Еженедельные отчёты и предупреждения о перерасходе снижают риск кассового разрыва в конце месяца.': 'Weekly reports and overspending warnings reduce the risk of a cash shortfall at the end of the month.', 'Если пользователь пока не готов анализировать все траты, можно начать хотя бы с контроля кафе, такси, подписок и развлечений.': 'If the user is not ready to analyze all expenses yet, they can at least start by tracking cafes, taxis, subscriptions, and entertainment.', 'Если расходы нестабильные, стоит ориентироваться не только на месяц, но и на недельные срезы поведения.': 'If expenses are unstable, it is worth looking not only at monthly patterns but also weekly ones.', 'Инвестиционное поведение': 'Investment behavior', 'Объяснение инфляции, реальной доходности и базовых принципов сохранения стоимости денег даже без инвестиций.': 'An explanation of inflation, real returns, and the basic principles of preserving the value of money even without investments.', 'Помощник объясняет простым языком, как инфляция влияет на накопления и почему номинальный рост суммы не всегда означает реальную выгоду.': 'The assistant explains in simple terms how inflation affects savings and why a nominal increase in amount does not always mean real benefit.', 'Он сравнивает хранение денег на обычном счёте и на вкладе, чтобы показать, как меняется покупательная способность средств со временем.': 'It compares keeping money in a regular account and in a deposit to show how purchasing power changes over time.', 'Если пользователь держит все деньги без доходности, помощник мягко подсказывает: «Хранить все деньги на счёте — это постепенная потеря стоимости». ': "If the user keeps all money without income, the assistant gently points out: 'Keeping all your money in an account means gradual loss of value.' ", 'В материалах раздела можно показать, что такое реальная доходность вклада и как её оценивать с учётом инфляции.': 'The materials in this section can show what the real return on a deposit is and how to evaluate it with inflation in mind.', 'Даже без доступа к акциям и бирже помощник формирует у пользователя полезную привычку смотреть не только на сумму, но и на реальную ценность денег.': 'Even without access to stocks or exchanges, the assistant helps the user build the useful habit of looking not only at the amount, but also at the real value of money.', 'Деньги, которые просто лежат на счёте без доходности, со временем теряют покупательную способность.': 'Money that simply sits in an account without earning income loses purchasing power over time.', 'Высокая номинальная ставка сама по себе не гарантирует реального роста капитала.': 'A high nominal rate alone does not guarantee real capital growth.', 'Пользователь начинает осознанно сравнивать варианты хранения денег и лучше понимает реальную выгоду вкладов.': 'The user begins to compare money storage options more consciously and better understands the real benefit of deposits.', 'Даже базовое понимание инфляции делает продукт полезным не только для операций, но и для финансового мышления.': 'Even a basic understanding of inflation makes the product useful not only for transactions but also for financial thinking.', 'Если пользователь не готов к сложным финансовым темам, можно начать с коротких карточек про инфляцию и реальную доходность.': 'If the user is not ready for complex financial topics, they can start with short cards about inflation and real returns.', 'Если цель — сохранить резерв, помощник может рекомендовать комбинировать свободный счёт и вклад вместо хранения всей суммы в одном месте.': 'If the goal is to preserve a reserve, the assistant may recommend combining a free-access account and a deposit instead of keeping the whole amount in one place.', 'Анти-ошибки': 'Anti-mistakes', 'Предупреждения перед рискованными действиями: крупные траты, опасные переводы и неудачные финансовые привычки.': 'Warnings before risky actions: large expenses, dangerous transfers, and poor financial habits.', 'Перед крупной тратой помощник проверяет долю суммы от текущего баланса и предупреждает, если пользователь собирается потратить слишком много за один раз.': 'Before a large expense, the assistant checks the share of the amount against the current balance and warns if the user is about to spend too much at once.', 'Если после перевода или оплаты остаток становится опасно маленьким, показывается понятное предупреждение, например: «После этого перевода останется меньше 5 000 ₽». ': "If the remaining balance becomes dangerously low after a transfer or payment, a clear warning is shown, for example: 'After this transfer, less than 5,000 RUB will remain.' ", 'При повторяющемся досрочном закрытии вкладов помощник обращает внимание на паттерн поведения и сообщает, что текущая стратегия накопления может быть неудачной.': 'When deposits are repeatedly closed early, the assistant points out the behavior pattern and says that the current savings strategy may be unsuccessful.', 'Система не запрещает действие жёстко, а помогает остановиться и ещё раз оценить последствия до подтверждения операции.': 'The system does not strictly block the action, but helps the user pause and reassess the consequences before confirming the operation.', 'Такие анти-ошибки делают цифрового помощника практичным инструментом, который не только объясняет, но и предотвращает слабые финансовые решения.': 'These anti-mistakes make the digital assistant a practical tool that not only explains things but also helps prevent poor financial decisions.', 'Трата 80% баланса за одну операцию создаёт высокий риск остаться без запаса на обязательные платежи.': 'Spending 80% of your balance in one operation creates a high risk of being left without a reserve for required payments.', 'Если после перевода остаётся слишком мало денег, любая неожиданная трата может привести к финансовому стрессу.': 'If too little money remains after a transfer, any unexpected expense may lead to financial stress.', 'Частое досрочное снятие вкладов обычно говорит о том, что стратегия распределения денег выбрана неправильно.': 'Frequent early withdrawal from deposits usually means the money allocation strategy has been chosen incorrectly.', 'Пользователь реже принимает импульсивные решения и заранее видит рискованные сценарии.': 'The user makes impulsive decisions less often and sees risky scenarios in advance.', 'Продукт становится реально полезным, потому что вмешивается в момент ошибки, а не после неё.': 'The product becomes genuinely useful because it intervenes at the moment of the mistake, not after it.', 'Если действие всё же необходимо, помощник может рекомендовать уменьшить сумму операции или перенести часть расходов.': 'If the action is still necessary, the assistant can recommend reducing the transaction amount or postponing part of the expenses.', 'Если риск связан с вкладом, можно предложить держать больший резерв на основном счёте и уменьшать сумму размещения.': 'If the risk is related to a deposit, it may be better to keep a larger reserve in the main account and reduce the deposited amount.'})
+
+    def tr(text: str) -> str:
+        if current_language() == "English":
+            return TRANSLATIONS.get(text, text)
+        return text
+
+    def tr_history_text(text: str) -> str:
+        if not text:
+            return text
+        if current_language() != "English":
+            return text
+        if text in TRANSLATIONS:
+            return TRANSLATIONS[text]
+        if text.startswith("Открытие вклада: "):
+            return TRANSLATIONS["Открытие вклада: "] + tr_history_text(text.split(": ", 1)[1])
+        if text.startswith("Перевод на вклад "):
+            return TRANSLATIONS["Перевод на вклад "] + tr_history_text(text.replace("Перевод на вклад ", "", 1))
+        if ": " in text:
+            left, right = text.split(": ", 1)
+            return f"{tr_history_text(left)}: {tr_history_text(right)}"
+        return TRANSLATIONS.get(text, text)
+
+    def translate_tree_node(node):
+        if not node:
+            return node
+        if isinstance(node, dict):
+            new = {}
+            for k,v in node.items():
+                if k in ["title","description"] and isinstance(v,str):
+                    new[k] = tr(v)
+                elif k in ["instructions","warnings","consequences","alternatives"] and isinstance(v,list):
+                    new[k] = [tr(x) if isinstance(x,str) else x for x in v]
+                elif k=="children" and isinstance(v,list):
+                    new[k] = [translate_tree_node(c) for c in v]
+                else:
+                    new[k] = v
+            return new
+        return node
+
     state = {
         "user": None,
         "rates": fetch_rates(),
         "profile_edit": False,
         "auth_mode": "login",
         "theme": "light",
+        "settings": {"theme": "light", "language": "Русский", "sound": "on"},
     }
 
     LIGHT_PALETTE = {
@@ -1176,13 +1343,25 @@ def main(page: ft.Page):
 
     def current_theme_name() -> str:
         cached_theme = normalize_theme_value(state.get("theme", "light"))
+        if cached_theme in ["light", "dark"]:
+            return cached_theme
+
+        cached_settings = state.get("settings") or {}
+        cached_theme = normalize_theme_value(cached_settings.get("theme", "light"))
+        if cached_theme in ["light", "dark"]:
+            state["theme"] = cached_theme
+            return cached_theme
+
         u = state.get("user")
         if u:
             settings = user_get_settings(u["id"])
-            cached_theme = normalize_theme_value(settings.get("theme", cached_theme))
+            state["settings"] = settings.copy()
+            cached_theme = normalize_theme_value(settings.get("theme", "light"))
             state["theme"] = cached_theme
             return cached_theme
-        return cached_theme
+
+        state["theme"] = "light"
+        return "light"
 
     def is_dark_theme() -> bool:
         return current_theme_name() == "dark"
@@ -1523,20 +1702,67 @@ def main(page: ft.Page):
         height=64,
         label_behavior=ft.NavigationBarLabelBehavior.ALWAYS_SHOW,
         destinations=[
-            ft.NavigationBarDestination(icon=ft.Icons.HOME, label="Главная"),
-            ft.NavigationBarDestination(icon=ft.Icons.SMART_TOY, label="Помощник"),
-            ft.NavigationBarDestination(icon=ft.Icons.PERSON, label="Профиль"),
-            ft.NavigationBarDestination(icon=ft.Icons.LIST, label="История"),
+            ft.NavigationBarDestination(icon=ft.Icons.HOME, label=tr("Главная")),
+            ft.NavigationBarDestination(icon=ft.Icons.SMART_TOY, label=tr("Помощник")),
+            ft.NavigationBarDestination(icon=ft.Icons.PERSON, label=tr("Профиль")),
+            ft.NavigationBarDestination(icon=ft.Icons.LIST, label=tr("История")),
         ],
         selected_index=0,
     )
 
+    def sync_language_controls():
+        profile_name_tf.label = tr("ФИО")
+        profile_email_tf.label = "Email"
+        profile_phone_tf.label = tr("Телефон")
+        profile_phone_tf.hint_text = tr("Не указан")
+        profile_account_tf.label = tr("Номер основного счета")
+        profile_lang_dd.label = tr("Язык интерфейса")
+        profile_theme_dd.label = tr("Тема оформления")
+        profile_theme_dd.options = [
+            ft.dropdown.Option("light", text=tr("Светлая")),
+            ft.dropdown.Option("dark", text=tr("Тёмная")),
+        ]
+
+        conv_amount.label = tr("Сумма")
+        conv_from.label = tr("Из")
+        conv_to.label = tr("В")
+        if not conv_result.value or conv_result.value in [
+            "Введите сумму и нажмите «Конвертировать».",
+            "Enter an amount and click Convert.",
+        ]:
+            conv_result.value = tr("Введите сумму и нажмите «Конвертировать».")
+
+        history_search_tf.label = tr("Поиск")
+        history_search_tf.hint_text = tr("Например: зарплата, вклад, перевод, такси")
+        history_date_from_tf.label = tr("Дата от")
+        history_date_to_tf.label = tr("Дата до")
+        history_type_dd.label = tr("Тип операции")
+        history_type_dd.options = [
+            ft.dropdown.Option("all", tr("Все")),
+            ft.dropdown.Option("income", tr("Пополнение")),
+            ft.dropdown.Option("expense", tr("Расход")),
+            ft.dropdown.Option("transfer", tr("Перевод")),
+            ft.dropdown.Option("deposit_open", tr("Открытие вклада")),
+            ft.dropdown.Option("deposit_close", tr("Закрытие вклада")),
+            ft.dropdown.Option("deposit_interest", tr("Начисление процентов")),
+        ]
+        history_min_amount_tf.label = tr("Сумма от")
+        history_max_amount_tf.label = tr("Сумма до")
+
+        nav.destinations = [
+            ft.NavigationBarDestination(icon=ft.Icons.HOME, label=tr("Главная")),
+            ft.NavigationBarDestination(icon=ft.Icons.SMART_TOY, label=tr("Помощник")),
+            ft.NavigationBarDestination(icon=ft.Icons.PERSON, label=tr("Профиль")),
+            ft.NavigationBarDestination(icon=ft.Icons.LIST, label=tr("История")),
+        ]
+
     def apply_theme_from_settings():
         sync_theme_controls()
+        sync_language_controls()
 
     settings_change_guard = {"active": False}
 
-    def save_app_settings(e=None, show_toast: bool = True):
+    def save_app_settings(e=None, show_toast: bool = True, rerender: bool = True):
         if settings_change_guard["active"]:
             return
 
@@ -1546,32 +1772,41 @@ def main(page: ft.Page):
             if not u:
                 return
 
-            selected_language = profile_lang_dd.value or "Русский"
-            selected_theme = normalize_theme_value(profile_theme_dd.value)
+            selected_language = (profile_lang_dd.value or "Русский").strip()
+            selected_theme_source = profile_theme_dd.value
+            if e and getattr(e, "control", None) is profile_theme_dd:
+                selected_theme_source = getattr(e, "data", None) or profile_theme_dd.value
+            selected_theme = normalize_theme_value(selected_theme_source)
+
+            profile_lang_dd.value = selected_language
             profile_theme_dd.value = selected_theme
+
             state["theme"] = selected_theme
+            state["settings"] = {
+                **(state.get("settings") or {}),
+                "language": selected_language,
+                "theme": selected_theme,
+            }
 
-            user_save_settings(
-                u["id"],
-                {
-                    "language": selected_language,
-                    "theme": selected_theme,
-                },
-            )
-
+            user_save_settings(u["id"], state["settings"])
             state["user"] = user_get_by_email(u["email"])
+
             apply_theme_from_settings()
             refresh_profile_view()
-            switch_to_home(nav.selected_index if nav.selected_index is not None else 2)
+            page.update()
+
+            if rerender:
+                switch_to_home(nav.selected_index if nav.selected_index is not None else 2)
             if show_toast:
-                toast("Настройки приложения обновлены")
+                toast(tr("Настройки приложения обновлены"))
         finally:
             settings_change_guard["active"] = False
 
     def handle_live_settings_change(e=None):
-        if state.get("profile_edit") or settings_change_guard["active"]:
+        if settings_change_guard["active"]:
             return
-        save_app_settings(show_toast=False)
+        # Изменения в настройках приложения теперь сохраняются отдельной кнопкой.
+        pass
 
     profile_lang_dd.on_change = handle_live_settings_change
     profile_theme_dd.on_change = handle_live_settings_change
@@ -1600,14 +1835,14 @@ def main(page: ft.Page):
     def toggle_sound(e=None):
         u = state.get("user")
         if not u:
-            toast("Сначала войдите")
+            toast(tr("Сначала войдите"))
             return
 
         enabled = is_sound_enabled()
         new_value = "off" if enabled else "on"
         user_save_settings(u["id"], {"sound": new_value})
         state["user"] = user_get_by_email(u["email"])
-        toast("Звук выключен" if new_value == "off" else "Звук включён")
+        toast(tr("Звук выключен") if new_value == "off" else tr("Звук включён"))
 
     def build_sound_toggle_button():
         enabled = is_sound_enabled()
@@ -1616,7 +1851,7 @@ def main(page: ft.Page):
             return ft.Row(
                 [
                     ft.Icon(ft.Icons.VOLUME_UP if is_enabled else ft.Icons.VOLUME_OFF, size=18, color=ui_color("text")),
-                    ft.Text("Выключить звук" if is_enabled else "Включить звук", color=ui_color("text"), weight="w600"),
+                    ft.Text(tr("Выключить звук") if is_enabled else tr("Включить звук"), color=ui_color("text"), weight="w600"),
                 ],
                 spacing=8,
                 tight=True,
@@ -1645,7 +1880,10 @@ def main(page: ft.Page):
         if not u:
             return
 
-        settings = user_get_settings(u["id"])
+        settings = (state.get("settings") or {}).copy()
+        if not settings:
+            settings = user_get_settings(u["id"])
+            state["settings"] = settings.copy()
         edit_mode = state.get("profile_edit", False)
 
         profile_name_tf.value = u.get("full_name") or ""
@@ -1659,14 +1897,14 @@ def main(page: ft.Page):
         profile_phone_tf.read_only = not edit_mode
         profile_email_tf.read_only = True
         profile_account_tf.read_only = True
-        profile_lang_dd.disabled = not edit_mode
-        profile_theme_dd.disabled = not edit_mode
+        profile_lang_dd.disabled = False
+        profile_theme_dd.disabled = False
 
     def build_history_item(op: Dict[str, Any]):
         op_type = op.get("type", "")
         amount = safe_float(op.get("amount"), 0.0)
-        title = op.get("title") or human_op_type(op_type)
-        details = op.get("details") or ""
+        title = tr_history_text(op.get("title") or human_op_type(op_type))
+        details = tr_history_text(op.get("details") or "")
         date_str = op.get("date", "")
         currency = op.get("currency", "RUB")
 
@@ -1681,7 +1919,7 @@ def main(page: ft.Page):
         else:
             amount_color = ui_color("text")
 
-        subtitle_parts = [human_op_type(op_type), date_str]
+        subtitle_parts = [tr(human_op_type(op_type)), date_str]
         if details:
             subtitle_parts.append(details)
 
@@ -1758,9 +1996,9 @@ def main(page: ft.Page):
         )
         stats = summarize_filtered_ops(filtered)
         history_summary_text.value = (
-            f"Найдено операций: {stats['count']} | "
-            f"Поступления: {stats['income_total']:.2f} RUB | "
-            f"Списания: {stats['expense_total']:.2f} RUB"
+            f"{tr('Найдено операций')}: {stats['count']} | "
+            f"{tr('Поступления')}: {stats['income_total']:.2f} RUB | "
+            f"{tr('Списания')}: {stats['expense_total']:.2f} RUB"
         )
         render_history_list(filtered)
         page.update()
@@ -1781,7 +2019,8 @@ def main(page: ft.Page):
 
         state["user"] = user_get_by_email(u["email"])
         u = state["user"]
-        state["theme"] = normalize_theme_value(user_get_settings(u["id"]).get("theme", "light"))
+        state["settings"] = user_get_settings(u["id"])
+        state["theme"] = normalize_theme_value(state["settings"].get("theme", "light"))
 
         apply_theme_from_settings()
 
@@ -1832,7 +2071,7 @@ def main(page: ft.Page):
                     )
                 )
         else:
-            deposits_column.controls.append(ft.Text("Вкладов пока нет", italic=True))
+            deposits_column.controls.append(ft.Text(tr("Вкладов пока нет"), italic=True))
 
         refresh_profile_view()
 
@@ -1867,7 +2106,7 @@ def main(page: ft.Page):
 
         u = user_get_by_email(em)
         if not u:
-            toast("Пользователь не найден")
+            toast(tr("Пользователь не найден"))
             return
 
         if u["password_hash"] != hash_password(pwdv):
@@ -1875,7 +2114,8 @@ def main(page: ft.Page):
             return
 
         state["user"] = u
-        state["theme"] = normalize_theme_value(user_get_settings(u["id"]).get("theme", "light"))
+        state["settings"] = user_get_settings(u["id"])
+        state["theme"] = normalize_theme_value(state["settings"].get("theme", "light"))
         switch_to_home()
 
     # ---- ИЗМЕНЕНО ТОЛЬКО ДЛЯ РАБОТЫ КНОПКИ "СОЗДАТЬ АККАУНТ" ----
@@ -1940,6 +2180,8 @@ def main(page: ft.Page):
             mk_op(u["id"], "income", 0, title="Регистрация")
 
             state["user"] = user_get_by_email(em)
+            state["settings"] = user_get_settings(state["user"]["id"])
+            state["theme"] = normalize_theme_value(state["settings"].get("theme", "light"))
 
             reg_name_tf.value = ""
             reg_email_tf.value = ""
@@ -2089,7 +2331,7 @@ def main(page: ft.Page):
         try:
             amt = float(conv_amount.value)
         except:
-            conv_result.value = "Неверная сумма"
+            conv_result.value = tr("Неверная сумма")
             page.update()
             return
 
@@ -2098,7 +2340,7 @@ def main(page: ft.Page):
         rates = state["rates"]
 
         if frm not in rates or to not in rates:
-            conv_result.value = "Курсы недоступны"
+            conv_result.value = tr("Курсы недоступны")
             page.update()
             return
 
@@ -2109,19 +2351,19 @@ def main(page: ft.Page):
 
     def update_rates(e=None):
         state["rates"] = fetch_rates()
-        toast("Курсы обновлены")
+        toast(tr("Курсы обновлены"))
 
     def open_deposit_dialog(e=None):
         u = state["user"]
         if not u:
-            toast("Сначала войдите")
+            toast(tr("Сначала войдите"))
             return
 
         prod_dd = ft.Dropdown(
             options=[
                 ft.dropdown.Option(
                     p["id"],
-                    text=f"{p['name']} — {p['rate'] * 100:.2f}% ({p['term_months']}м) min {p['min_sum']} RUB",
+                    text=f"{tr_history_text(p['name'])} — {p['rate'] * 100:.2f}% ({p['term_months']}{tr('мес.')}) min {p['min_sum']} RUB",
                 )
                 for p in DEPOSIT_PRODUCTS
             ],
@@ -2130,7 +2372,7 @@ def main(page: ft.Page):
         )
 
         sum_tf = ft.TextField(
-            label="Сумма (RUB)",
+            label=tr("Сумма (RUB)"),
             value=str(DEPOSIT_PRODUCTS[0]["min_sum"]),
             width=320,
             keyboard_type=ft.KeyboardType.NUMBER,
@@ -2141,26 +2383,26 @@ def main(page: ft.Page):
             prod = next((p for p in DEPOSIT_PRODUCTS if p["id"] == pid), None)
 
             if not prod:
-                toast("Продукт не найден")
+                toast(tr("Продукт не найден"))
                 return
 
             try:
                 amount = float(sum_tf.value)
             except Exception:
-                toast("Неверная сумма")
+                toast(tr("Неверная сумма"))
                 return
 
             if amount < prod["min_sum"]:
-                toast(f"Мин. сумма {prod['min_sum']} RUB")
+                toast(f"{tr('Мин. сумма')} {prod['min_sum']} RUB")
                 return
 
             user = user_get_by_email(u["email"])
             if not user:
-                toast("Пользователь не найден")
+                toast(tr("Пользователь не найден"))
                 return
 
             if float(user["balance"]) < float(amount):
-                toast("Недостаточно средств")
+                toast(tr("Недостаточно средств"))
                 return
 
             user_update_balance(user["id"], float(user["balance"]) - float(amount))
@@ -2170,7 +2412,7 @@ def main(page: ft.Page):
             page.dialog.open = False
             refresh_user()
             page.update()
-            toast("Вклад открыт")
+            toast(tr("Вклад открыт"))
 
         def cancel(ev):
             page.dialog.open = False
@@ -2179,11 +2421,11 @@ def main(page: ft.Page):
         sync_form_control_theme(prod_dd)
         sync_form_control_theme(sum_tf)
         page.dialog = ft.AlertDialog(
-            title=ft.Text("Открытие вклада", color=ui_color("text")),
+            title=ft.Text(tr("Открытие вклада"), color=ui_color("text")),
             content=ft.Column([prod_dd, sum_tf], spacing=8, tight=True),
             actions=[
-                ft.TextButton("Отмена", on_click=cancel),
-                ft.ElevatedButton("Открыть", on_click=ok),
+                ft.TextButton(tr("Отмена"), on_click=cancel),
+                ft.ElevatedButton(tr("Открыть"), on_click=ok),
             ],
             bgcolor=ui_color("surface"),
         )
@@ -2208,7 +2450,7 @@ def main(page: ft.Page):
         user_update_profile(u["id"], full_name, phone)
         state["profile_edit"] = False
         save_app_settings(show_toast=False)
-        toast("Раздел «Профиль и настройки» обновлён")
+        toast(tr("Раздел «Профиль и настройки» обновлён"))
 
     def toggle_profile_edit(e=None):
         state["profile_edit"] = not state.get("profile_edit", False)
@@ -2220,13 +2462,14 @@ def main(page: ft.Page):
         state["user"] = None
         state["profile_edit"] = False
         state["theme"] = "light"
+        state["settings"] = {"theme": "light", "language": "Русский", "sound": "on"}
         login_pwd.value = ""
         switch_to_auth()
 
     def show_password_dialog(e=None):
         u = state["user"]
         if not u:
-            toast("Сначала войдите")
+            toast(tr("Сначала войдите"))
             return
 
         old_tf = ft.TextField(label="Старый пароль", password=True, can_reveal_password=True, width=320)
@@ -2350,7 +2593,7 @@ def main(page: ft.Page):
         return out
 
     def get_nodes_by_path(path_ids):
-        nodes = ASSISTANT_ROOT_TREE
+        nodes = translate_tree_node(ASSISTANT_ROOT_TREE)
         current = None
         for pid in path_ids:
             current = next((n for n in nodes if n["id"] == pid), None)
@@ -2361,7 +2604,7 @@ def main(page: ft.Page):
 
     def get_node_ids_by_path_titles(path_titles):
         ids = []
-        nodes = ASSISTANT_ROOT_TREE
+        nodes = translate_tree_node(ASSISTANT_ROOT_TREE)
         for title in path_titles:
             current = next((n for n in nodes if n["title"] == title), None)
             if not current:
@@ -2371,7 +2614,7 @@ def main(page: ft.Page):
         return ids
 
     def open_assistant_node(node_id: str):
-        flat = flatten_assistant_nodes(ASSISTANT_ROOT_TREE)
+        flat = flatten_assistant_nodes(translate_tree_node(ASSISTANT_ROOT_TREE))
         target = next((n for n in flat if n["id"] == node_id), None)
         if not target:
             return
@@ -2618,16 +2861,16 @@ def main(page: ft.Page):
             )
 
         controls = [
-            ft.Text("Цифровой помощник", size=20, weight="bold"),
-            ft.Text("Анализатор капитала", size=18, weight="bold"),
+            ft.Text(tr("Цифровой помощник"), size=20, weight="bold"),
+            ft.Text(tr("Анализатор капитала"), size=18, weight="bold"),
             ft.Text(
                 "Наглядный разбор месячных расходов: куда уходят деньги, какие траты повторяются и где можно освободить часть бюджета.",
                 color=ui_color("muted"),
             ),
-            ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text("Назад к выбору режима", color=ui_color("primary"))]),
+            ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(tr("Назад к выбору режима"), color=ui_color("primary"))]),
         ]
 
-        overview_main = data["overview"][0] if data["overview"] else "Пока недостаточно данных для анализа."
+        overview_main = data["overview"][0] if data["overview"] else tr("Пока недостаточно данных для анализа.")
         top_cat_name, top_cat_amount = data["top_categories"][0] if data["top_categories"] else ("—", 0.0)
         possible_saving = 0.0
         if data["recommendations"] and top_cat_amount > 0:
@@ -2640,7 +2883,7 @@ def main(page: ft.Page):
                 border_radius=22,
                 content=ft.Column(
                     [
-                        ft.Text("Общая картина за месяц", size=16, weight="bold"),
+                        ft.Text(tr("Общая картина за месяц"), size=16, weight="bold"),
                         ft.Row(
                             [
                                 ft.Container(
@@ -2799,7 +3042,7 @@ def main(page: ft.Page):
     def rank_assistant_matches(query: str):
         query_words = [w for w in re.split(r"\s+", query.lower()) if w]
         matches = []
-        for node in flatten_assistant_nodes(ASSISTANT_ROOT_TREE):
+        for node in flatten_assistant_nodes(translate_tree_node(ASSISTANT_ROOT_TREE)):
             hay_parts = [
                 node.get("title", ""),
                 node.get("description", ""),
@@ -2828,7 +3071,7 @@ def main(page: ft.Page):
         return unique
 
     def build_related_topic_suggestions(query: str):
-        all_nodes = [n for n in flatten_assistant_nodes(ASSISTANT_ROOT_TREE) if n.get("children") or n.get("instructions")]
+        all_nodes = [n for n in flatten_assistant_nodes(translate_tree_node(ASSISTANT_ROOT_TREE)) if n.get("children") or n.get("instructions")]
         query_words = [w for w in re.split(r"\s+", query.lower()) if len(w) > 2]
         scored = []
         for node in all_nodes:
@@ -2861,13 +3104,13 @@ def main(page: ft.Page):
         selected_id = assistant_state["selected"]
         selected_node = None
         if selected_id:
-            selected_node = next((n for n in flatten_assistant_nodes(ASSISTANT_ROOT_TREE) if n["id"] == selected_id), None)
+            selected_node = next((n for n in flatten_assistant_nodes(translate_tree_node(ASSISTANT_ROOT_TREE)) if n["id"] == selected_id), None)
             if selected_node and selected_node.get("id") == "capital_analyzer":
                 return build_capital_analyzer_view()
 
         search_field = ft.TextField(
-            label="Поиск по темам и подтемам",
-            hint_text="Например: вклад, пароль, комиссия",
+            label=tr("Поиск по темам и подтемам"),
+            hint_text=tr("Например: вклад, пароль, комиссия"),
             value=assistant_state["query"],
             prefix_icon=ft.Icons.SEARCH,
             on_change=lambda e: assistant_state.__setitem__("query", e.control.value or ""),
@@ -2875,11 +3118,11 @@ def main(page: ft.Page):
         )
 
         body_controls = [
-            ft.Text("Цифровой помощник", size=20, weight="bold"),
-            ft.Text("Выберите нужный режим: интересующие вопросы или анализатор капитала.", color=ui_color("muted")),
+            ft.Text(tr("Цифровой помощник"), size=20, weight="bold"),
+            ft.Text(tr("Выберите нужный режим: интересующие вопросы или анализатор капитала."), color=ui_color("muted")),
             search_field,
             ft.Button(
-                "Найти",
+                tr("Найти"),
                 icon=ft.Icons.SEARCH,
                 on_click=lambda e: (setattr(main_container, "content", build_assistant_view()), page.update()),
             ),
@@ -2888,15 +3131,15 @@ def main(page: ft.Page):
         if assistant_state["query"].strip():
             query = assistant_state["query"].strip().lower()
             matches = rank_assistant_matches(query)
-            body_controls.append(ft.Text(f"Результаты поиска: {len(matches)}", weight="bold"))
+            body_controls.append(ft.Text(f"{tr('Результаты поиска')}: {len(matches)}", weight="bold"))
             if matches:
                 for node in matches[:12]:
                     body_controls.append(
                         ft.Card(
                             ft.ListTile(
                                 leading=ft.Icon(node.get("icon") or ft.Icons.ARTICLE),
-                                title=ft.Text(node["title"]),
-                                subtitle=ft.Text(" → ".join(node["path_titles"])),
+                                title=ft.Text(tr(node["title"])),
+                                subtitle=ft.Text(" → ".join([tr(x) for x in node["path_titles"]])),
                                 trailing=ft.Icon(ft.Icons.ARROW_FORWARD_IOS, size=16),
                                 on_click=lambda e, nid=node["id"]: assistant_open_result(nid),
                             )
@@ -2905,8 +3148,8 @@ def main(page: ft.Page):
             else:
                 suggestions = build_related_topic_suggestions(query)
                 related_controls = [
-                    ft.Text("Тема не найдена", weight="bold"),
-                    ft.Text("Ниже показаны близкие разделы и связанные подтемы."),
+                    ft.Text(tr("Тема не найдена"), weight="bold"),
+                    ft.Text(tr("Ниже показаны близкие разделы и связанные подтемы.")),
                 ]
                 for node in suggestions:
                     related_controls.append(
@@ -2938,10 +3181,10 @@ def main(page: ft.Page):
                     content=ft.Column(
                         [
                             ft.Row(
-                                [ft.Icon(selected_node.get("icon") or ft.Icons.ARTICLE, size=28), ft.Text(selected_node["title"], size=18, weight="bold")],
+                                [ft.Icon(selected_node.get("icon") or ft.Icons.ARTICLE, size=28), ft.Text(tr(selected_node["title"]), size=18, weight="bold")],
                                 spacing=10,
                             ),
-                            ft.Text(selected_node.get("description", ""), color=ui_color("muted")),
+                            ft.Text(tr(selected_node.get("description", "")), color=ui_color("muted")),
                         ],
                         spacing=8,
                     ),
@@ -2950,34 +3193,34 @@ def main(page: ft.Page):
                     border_radius=18,
                 )
             )
-            card = render_instruction_card("Пошаговая инструкция", selected_node.get("instructions", []), ft.Icons.LIST, "info")
+            card = render_instruction_card(tr("Пошаговая инструкция"), selected_node.get("instructions", []), ft.Icons.LIST, "info")
             if card:
                 body_controls.append(card)
-            warn = render_instruction_card("Важные предупреждения", selected_node.get("warnings", []), ft.Icons.WARNING, "warning")
+            warn = render_instruction_card(tr("Важные предупреждения"), selected_node.get("warnings", []), ft.Icons.WARNING, "warning")
             if warn:
                 body_controls.append(warn)
-            cons = render_instruction_card("Оценка последствий", selected_node.get("consequences", []), ft.Icons.BAR_CHART, "success")
+            cons = render_instruction_card(tr("Оценка последствий"), selected_node.get("consequences", []), ft.Icons.BAR_CHART, "success")
             if cons:
                 body_controls.append(cons)
-            alt = render_instruction_card("Альтернативные варианты", selected_node.get("alternatives", []), ft.Icons.SWAP_HORIZ, "neutral")
+            alt = render_instruction_card(tr("Альтернативные варианты"), selected_node.get("alternatives", []), ft.Icons.SWAP_HORIZ, "neutral")
             if alt:
                 body_controls.append(alt)
         else:
             if current_node:
-                body_controls.append(ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(current_node["title"], size=18, weight="bold")]))
-                body_controls.append(ft.Text(current_node.get("description", ""), color=ui_color("muted")))
+                body_controls.append(ft.Row([ft.IconButton(ft.Icons.ARROW_BACK, on_click=assistant_go_back), ft.Text(tr(current_node["title"]), size=18, weight="bold")]))
+                body_controls.append(ft.Text(tr(current_node.get("description", "")), color=ui_color("muted")))
             else:
-                body_controls.append(ft.Text("Выберите раздел", weight="bold"))
+                body_controls.append(ft.Text(tr("Выберите раздел"), weight="bold"))
 
-            for node in current_children if current_node else ASSISTANT_ROOT_TREE:
+            for node in current_children if current_node else translate_tree_node(ASSISTANT_ROOT_TREE):
                 is_leaf = not node.get("children")
                 body_controls.append(
                     ft.Card(
                         ft.ListTile(
                             leading=ft.Icon(node.get("icon") or ft.Icons.FOLDER),
-                            title=ft.Text(node["title"], weight="bold"),
-                            subtitle=ft.Text(node.get("description", "")),
-                            trailing=ft.Text("Инструкция" if is_leaf else "Раздел", size=11, color=ui_color("primary")),
+                            title=ft.Text(tr(node["title"]), weight="bold"),
+                            subtitle=ft.Text(tr(node.get("description", ""))),
+                            trailing=ft.Text(tr("Инструкция") if is_leaf else tr("Раздел"), size=11, color=ui_color("primary")),
                             on_click=(lambda e, nid=node["id"], leaf=is_leaf: assistant_open_result(nid) if leaf else assistant_open_category(nid)),
                         )
                     )
@@ -2995,11 +3238,11 @@ def main(page: ft.Page):
         converter_card = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Виджет конвертации валют", weight="bold"),
-                    ft.TextButton("Обновить курсы", on_click=update_rates),
+                    ft.Text(tr("Виджет конвертации валют"), weight="bold"),
+                    ft.TextButton(tr("Обновить курсы"), on_click=update_rates),
                     conv_amount,
                     ft.Row([conv_from, conv_to], spacing=8, wrap=False),
-                    ft.ElevatedButton("Конвертировать", icon=ft.Icons.CURRENCY_EXCHANGE, on_click=do_convert),
+                    ft.ElevatedButton(tr("Конвертировать"), icon=ft.Icons.CURRENCY_EXCHANGE, on_click=do_convert),
                     conv_result,
                 ],
                 spacing=10,
@@ -3013,8 +3256,8 @@ def main(page: ft.Page):
         deposits_card = ft.Container(
             content=ft.Column(
                 [
-                    ft.Row([ft.Text("Доступные вклады", weight="bold"), ft.ElevatedButton("Открыть вклад", icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog)]),
-                    ft.Text("Список продуктов со ставкой, сроком и минимальной суммой открытия.", size=12, color=ui_color("muted")),
+                    ft.Row([ft.Text(tr("Доступные вклады"), weight="bold"), ft.ElevatedButton(tr("Открыть вклад"), icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog)]),
+                    ft.Text(tr("Список продуктов со ставкой, сроком и минимальной суммой открытия."), size=12, color=ui_color("muted")),
                     ft.Column(
                         [
                             ft.Container(
@@ -3022,8 +3265,8 @@ def main(page: ft.Page):
                                     [
                                         ft.Column(
                                             [
-                                                ft.Text(p["name"], weight="bold"),
-                                                ft.Text(f"Срок: {p['term_months']} мес. • Мин. сумма: {p['min_sum']} RUB", size=12, color=ui_color("muted")),
+                                                ft.Text(tr_history_text(p["name"]), weight="bold"),
+                                                ft.Text(f"{tr('Срок')}: {p['term_months']} {tr('мес.')} • {tr('Мин. сумма')}: {p['min_sum']} RUB", size=12, color=ui_color("muted")),
                                             ],
                                             expand=True,
                                             spacing=2,
@@ -3041,7 +3284,7 @@ def main(page: ft.Page):
                         spacing=8,
                     ),
                     ft.Divider(),
-                    ft.Text("Ваши активные вклады", weight="bold"),
+                    ft.Text(tr("Ваши активные вклады"), weight="bold"),
                     deposits_column,
                 ],
                 spacing=10,
@@ -3054,8 +3297,8 @@ def main(page: ft.Page):
 
         return ft.Column(
             [
-                ft.Text("Главная", size=20, weight="bold"),
-                ft.Text("Баланс, вклады и быстрые действия в одном экране.", color=ui_color("muted")),
+                ft.Text(tr("Главная"), size=20, weight="bold"),
+                ft.Text(tr("Баланс, вклады и быстрые действия в одном экране."), color=ui_color("muted")),
                 card,
                 quick_actions,
                 deposits_card,
@@ -3069,16 +3312,16 @@ def main(page: ft.Page):
     def build_history_view():
         return ft.Column(
             [
-                ft.Text("История операций", size=20, weight="bold"),
-                ft.Text("Полная лента переводов, пополнений, расходов и операций по вкладам.", color=ui_color("muted")),
+                ft.Text(tr("История операций"), size=20, weight="bold"),
+                ft.Text(tr("Полная лента переводов, пополнений, расходов и операций по вкладам."), color=ui_color("muted")),
                 ft.Divider(),
                 history_search_tf,
                 ft.Row([history_date_from_tf, history_date_to_tf], wrap=True, spacing=8),
                 ft.Row([history_type_dd, history_min_amount_tf, history_max_amount_tf], wrap=True, spacing=8),
                 ft.Row(
                     [
-                        ft.ElevatedButton("Применить", icon=ft.Icons.FILTER_ALT, on_click=apply_history_filters),
-                        ft.TextButton("Сбросить", on_click=reset_history_filters),
+                        ft.ElevatedButton(tr("Применить"), icon=ft.Icons.FILTER_ALT, on_click=apply_history_filters),
+                        ft.TextButton(tr("Сбросить"), on_click=reset_history_filters),
                     ],
                     spacing=8,
                 ),
@@ -3099,16 +3342,16 @@ def main(page: ft.Page):
 
         return ft.Column(
             [
-                ft.Text("Профиль и настройки", size=20, weight="bold"),
-                ft.Text("Личные данные, безопасность и персонализация приложения.", color=ui_color("muted")),
+                ft.Text(tr("Профиль и настройки"), size=20, weight="bold"),
+                ft.Text(tr("Личные данные, безопасность и персонализация приложения."), color=ui_color("muted")),
                 ft.Container(
                     content=ft.Column(
                         [
                             ft.Row(
                                 [
-                                    ft.Text("Личные данные", weight="bold"),
+                                    ft.Text(tr("Личные данные"), weight="bold"),
                                     ft.TextButton(
-                                        "Сохранить" if edit_mode else "Редактировать",
+                                        tr("Сохранить") if edit_mode else tr("Редактировать"),
                                         icon=ft.Icons.EDIT_OUTLINED if not edit_mode else ft.Icons.SAVE_OUTLINED,
                                         on_click=save_profile if edit_mode else toggle_profile_edit,
                                     ),
@@ -3128,12 +3371,12 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Text("Безопасность", weight="bold"),
-                            ft.Text("Смена пароля с подтверждением старого значения.", size=12, color=ui_color("muted")),
+                            ft.Text(tr("Безопасность"), weight="bold"),
+                            ft.Text(tr("Смена пароля с подтверждением старого значения."), size=12, color=ui_color("muted")),
                             ft.Row(
                                 [
-                                    ft.ElevatedButton("Сменить пароль", icon=ft.Icons.LOCK_RESET, on_click=show_password_dialog),
-                                    ft.OutlinedButton("Выйти из аккаунта", icon=ft.Icons.LOGOUT, on_click=logout_user),
+                                    ft.ElevatedButton(tr("Сменить пароль"), icon=ft.Icons.LOCK_RESET, on_click=show_password_dialog),
+                                    ft.OutlinedButton(tr("Выйти из аккаунта"), icon=ft.Icons.LOGOUT, on_click=logout_user),
                                 ],
                                 wrap=True,
                                 spacing=8,
@@ -3149,10 +3392,20 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Text("Настройки приложения", weight="bold"),
+                            ft.Row(
+                                [
+                                    ft.Text(tr("Настройки приложения"), weight="bold"),
+                                    ft.TextButton(
+                                        tr("Сохранить"),
+                                        icon=ft.Icons.SAVE_OUTLINED,
+                                        on_click=lambda e: save_app_settings(show_toast=True, rerender=True),
+                                    ),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ),
                             profile_lang_dd,
                             profile_theme_dd,
-                            ft.Text("Изменения темы и языка сохраняются после нажатия «Сохранить» в разделе выше.", size=12, color=ui_color("muted")),
+                            ft.Text(tr("Измените язык или тему и нажмите «Сохранить»."), size=12, color=ui_color("muted")),
                         ],
                         spacing=10,
                     ),
@@ -3177,8 +3430,9 @@ def main(page: ft.Page):
             main_container.content = build_assistant_view()
             page.update()
         elif idx == 2:
-            main_container.content = build_profile_view()
             refresh_user()
+            refresh_profile_view()
+            main_container.content = build_profile_view()
         elif idx == 3:
             main_container.content = build_history_view()
             apply_history_filters()
@@ -3187,6 +3441,7 @@ def main(page: ft.Page):
 
     def switch_to_home(selected_index=0):
         sync_theme_controls()
+        sync_language_controls()
         page.controls.clear()
 
         top_row = ft.Row(
@@ -3194,7 +3449,7 @@ def main(page: ft.Page):
                 ft.Column(
                     [
                         ft.Text("NeoBank", size=18, weight="bold"),
-                        ft.Text("Личный цифровой банк", size=11, color=ui_color("muted")),
+                        ft.Text(tr("Личный цифровой банк"), size=11, color=ui_color("muted")),
                     ],
                     spacing=0,
                 ),
@@ -3211,6 +3466,7 @@ def main(page: ft.Page):
 
     def switch_to_auth():
         sync_theme_controls()
+        sync_language_controls()
         page.controls.clear()
         auth_stack.content = build_auth_card()
         auth_wrap = ft.Column([auth_stack], expand=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
