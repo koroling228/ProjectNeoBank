@@ -2774,50 +2774,53 @@ def main(page: ft.Page):
         switch_to_auth()
 
     def show_password_dialog(e=None):
+        print("show_password_dialog called")
         u = state["user"]
         if not u:
             toast(tr("Сначала войдите"))
             return
-
-        old_tf = ft.TextField(label="Старый пароль", password=True, can_reveal_password=True, width=320)
-        new_tf = ft.TextField(label="Новый пароль", password=True, can_reveal_password=True, width=320)
-        confirm_tf = ft.TextField(label="Подтвердите новый пароль", password=True, can_reveal_password=True, width=320)
-        password_error_text = ft.Text("", color=ft.Colors.RED_600, size=12, visible=False)
-
-        dialog_ref = {"dialog": None}
-
+        old_tf = ft.TextField(
+            label="Старый пароль",
+            password=True,
+            can_reveal_password=True,
+            width=320,
+        )
+        new_tf = ft.TextField(
+            label="Новый пароль",
+            password=True,
+            can_reveal_password=True,
+            width=320,
+        )
+        confirm_tf = ft.TextField(
+            label="Подтвердите новый пароль",
+            password=True,
+            can_reveal_password=True,
+            width=320,
+        )
+        password_error_text = ft.Text(
+            "",
+            color=ft.Colors.RED_600,
+            size=12,
+            visible=False,
+        )
         def clear_password_errors(update: bool = True):
             changed = False
-            for field in [old_tf, new_tf, confirm_tf]:
-                if field.error_text is not None:
-                    field.error_text = None
-                    changed = True
             if password_error_text.visible or password_error_text.value:
                 password_error_text.value = ""
                 password_error_text.visible = False
                 changed = True
             if update and changed:
-                try:
-                    if dialog_ref["dialog"] and dialog_ref["dialog"].open:
-                        page.update()
-                except Exception:
-                    page.update()
-
+                page.update()
         def clear_single_password_error(ev):
             changed = False
-            if getattr(ev.control, "error_text", None):
-                ev.control.error_text = None
-                changed = True
             if password_error_text.visible or password_error_text.value:
                 password_error_text.value = ""
                 password_error_text.visible = False
                 changed = True
             if changed:
                 page.update()
-
         def show_password_error(field, message: str):
             clear_password_errors(update=False)
-            field.error_text = message
             password_error_text.value = message
             password_error_text.visible = True
             try:
@@ -2825,68 +2828,81 @@ def main(page: ft.Page):
             except Exception:
                 pass
             page.update()
-
         old_tf.on_change = clear_single_password_error
         new_tf.on_change = clear_single_password_error
         confirm_tf.on_change = clear_single_password_error
-
+        sync_form_control_theme(old_tf)
+        sync_form_control_theme(new_tf)
+        sync_form_control_theme(confirm_tf)
+        dlg = None
         def close_dialog(ev=None):
-            close_modal(dialog_ref["dialog"])
-
-        def do_change(ev):
+            nonlocal dlg
+            if dlg is not None:
+                dlg.open = False
+                page.update()
+        def do_change(ev=None):
+            nonlocal dlg
             user = user_get_by_email(u["email"])
             if not user:
                 show_password_error(old_tf, "Пользователь не найден")
                 return
-
             old_password = old_tf.value or ""
             new_password = new_tf.value or ""
             confirm_password = confirm_tf.value or ""
-
             if not old_password:
                 show_password_error(old_tf, "Введите старый пароль")
                 return
-
             if user["password_hash"] != hash_password(old_password):
                 show_password_error(old_tf, "Старый пароль введён неверно")
                 return
-
             if not new_password:
                 show_password_error(new_tf, "Введите новый пароль")
                 return
-
             if new_password == old_password:
                 show_password_error(new_tf, "Новый пароль должен отличаться от старого")
                 return
-
             if not confirm_password:
                 show_password_error(confirm_tf, "Подтвердите новый пароль")
                 return
-
             if new_password != confirm_password:
                 show_password_error(confirm_tf, "Новый пароль и подтверждение не совпадают")
                 return
-
             ok, msg = validate_password(user["email"], new_password)
             if not ok:
                 show_password_error(new_tf, msg)
                 return
-
             user_change_password(user["id"], new_password)
-            close_dialog()
+            if dlg is not None:
+                dlg.open = False
+            page.update()
             toast("Пароль успешно изменён")
-
-        sync_form_control_theme(old_tf)
-        sync_form_control_theme(new_tf)
-        sync_form_control_theme(confirm_tf)
-        dialog_ref["dialog"] = ft.AlertDialog(
+        dlg = ft.AlertDialog(
             modal=True,
             title=ft.Text("Смена пароля", color=ui_color("text")),
-            content=ft.Column([old_tf, new_tf, confirm_tf, password_error_text], tight=True, spacing=8),
-            actions=[ft.TextButton("Отмена", on_click=close_dialog), ft.ElevatedButton("Сохранить", on_click=do_change)],
+            content=ft.Container(
+                content=ft.Column(
+                    [old_tf, new_tf, confirm_tf, password_error_text],
+                    tight=True,
+                    spacing=8,
+                ),
+                width=340,
+            ),
+            actions=[
+                ft.TextButton(
+                    content=ft.Text("Отмена"),
+                    on_click=close_dialog,
+                ),
+                ft.Button(
+                    content=ft.Text("Сохранить"),
+                    on_click=do_change,
+                ),
+            ],
             bgcolor=ui_color("surface"),
         )
-        open_modal(dialog_ref["dialog"])
+        if dlg not in page.overlay:
+            page.overlay.append(dlg)
+        dlg.open = True
+        page.update()
 
     def flatten_assistant_nodes(nodes, path_titles=None):
         path_titles = path_titles or []
@@ -3682,7 +3698,7 @@ def main(page: ft.Page):
                             ft.Text(tr("Смена пароля с подтверждением старого значения."), size=12, color=ui_color("muted")),
                             ft.Row(
                                 [
-                                    ft.ElevatedButton(tr("Сменить пароль"), icon=ft.Icons.LOCK_RESET, on_click=show_password_dialog),
+                                    ft.Button(tr("Сменить пароль"), icon=ft.Icons.LOCK_RESET, on_click=show_password_dialog),
                                     ft.OutlinedButton(tr("Выйти из аккаунта"), icon=ft.Icons.LOGOUT, on_click=logout_user),
                                 ],
                                 wrap=True,
