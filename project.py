@@ -2,7 +2,7 @@
 # NeoBank — объединённая версия с SQLite, мобильным UI,
 # рабочей аутентификацией, полным цифровым помощником,
 # открытием вкладов, профилем, темой и улучшенной историей операций
-# Совместимо с flet 0.81.0
+# Совместимо с flet 0.80.5
 # Требования: pip install flet requests matplotlib
 
 import flet as ft
@@ -1978,7 +1978,6 @@ def main(page: ft.Page):
             ft.dropdown.Option("all", "Все"),
             ft.dropdown.Option("income", "Пополнение"),
             ft.dropdown.Option("expense", "Расход"),
-            ft.dropdown.Option("transfer", "Перевод"),
             ft.dropdown.Option("deposit_open", "Открытие вклада"),
             ft.dropdown.Option("deposit_close", "Закрытие вклада"),
             ft.dropdown.Option("deposit_interest", "Начисление процентов"),
@@ -2048,7 +2047,6 @@ def main(page: ft.Page):
             ft.dropdown.Option("all", tr("Все")),
             ft.dropdown.Option("income", tr("Пополнение")),
             ft.dropdown.Option("expense", tr("Расход")),
-            ft.dropdown.Option("transfer", tr("Перевод")),
             ft.dropdown.Option("deposit_open", tr("Открытие вклада")),
             ft.dropdown.Option("deposit_close", tr("Закрытие вклада")),
             ft.dropdown.Option("deposit_interest", tr("Начисление процентов")),
@@ -2528,7 +2526,7 @@ def main(page: ft.Page):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=8,
             ),
-            margin=ft.margin.only(top=8, bottom=12),
+            margin=ft.Margin.only(top=8, bottom=12),
         )
 
         tabs = ft.Container(
@@ -2561,7 +2559,7 @@ def main(page: ft.Page):
                 ],
                 spacing=10,
             ),
-            padding=ft.padding.only(bottom=10),
+            padding=ft.Padding.only(bottom=10)
         )
 
         if is_login:
@@ -2569,7 +2567,7 @@ def main(page: ft.Page):
                 [
                     login_email,
                     login_pwd,
-                    ft.ElevatedButton(
+                    ft.Button(
                         "Войти",
                         icon=ft.Icons.LOGIN,
                         width=320,
@@ -2597,7 +2595,7 @@ def main(page: ft.Page):
                     reg_pwd_tf,
                     reg_pwdc_tf,
                     register_error_text,
-                    ft.ElevatedButton(
+                    ft.Button(
                         "Создать аккаунт",
                         icon=ft.Icons.PERSON_ADD_ALT_1,
                         width=320,
@@ -2665,7 +2663,6 @@ def main(page: ft.Page):
         if not u:
             toast(tr("Сначала войдите"))
             return
-
         prod_dd = ft.Dropdown(
             options=[
                 ft.dropdown.Option(
@@ -2677,68 +2674,74 @@ def main(page: ft.Page):
             value=DEPOSIT_PRODUCTS[0]["id"],
             width=320,
         )
-
         sum_tf = ft.TextField(
             label=tr("Сумма (RUB)"),
             value=str(DEPOSIT_PRODUCTS[0]["min_sum"]),
             width=320,
             keyboard_type=ft.KeyboardType.NUMBER,
         )
-
-        def ok(ev):
+        sync_form_control_theme(prod_dd)
+        sync_form_control_theme(sum_tf)
+        dlg = None
+        def close_dialog(ev=None):
+            nonlocal dlg
+            if dlg is not None:
+                dlg.open = False
+                page.update()
+        def ok(ev=None):
+            nonlocal dlg
             pid = prod_dd.value
             prod = next((p for p in DEPOSIT_PRODUCTS if p["id"] == pid), None)
-
             if not prod:
                 toast(tr("Продукт не найден"))
                 return
-
             try:
-                amount = float(sum_tf.value)
+                amount = float((sum_tf.value or "").replace(",", "."))
             except Exception:
                 toast(tr("Неверная сумма"))
                 return
-
             if amount < prod["min_sum"]:
                 toast(f"{tr('Мин. сумма')} {prod['min_sum']} RUB")
                 return
-
             user = user_get_by_email(u["email"])
             if not user:
                 toast(tr("Пользователь не найден"))
                 return
-
             if float(user["balance"]) < float(amount):
                 toast(tr("Недостаточно средств"))
                 return
-
-            user_update_balance(user["id"], float(user["balance"]) - float(amount))
-            create_deposit(user["id"], prod["name"], amount, prod["rate"], prod["term_months"])
-            mk_op(user["id"], "transfer", -amount, title=f"Перевод на вклад {prod['name']}")
-
-            page.dialog.open = False
-            refresh_user()
-            page.update()
-            toast(tr("Вклад открыт"))
-
-        def cancel(ev):
-            page.dialog.open = False
-            page.update()
-
-        sync_form_control_theme(prod_dd)
-        sync_form_control_theme(sum_tf)
-        page.dialog = ft.AlertDialog(
+            try:
+                user_update_balance(user["id"], float(user["balance"]) - float(amount))
+                create_deposit(user["id"], prod["name"], amount, prod["rate"], prod["term_months"])
+                mk_op(user["id"], "transfer", -amount, title=f"Перевод на вклад {prod['name']}")
+                if dlg is not None:
+                    dlg.open = False
+                    refresh_user()
+                    page.update()
+                    toast(tr("Вклад открыт"))
+            except Exception as ex:
+                toast(f"Ошибка открытия вклада: {ex}")
+        dlg = ft.AlertDialog(
+            modal=True,
             title=ft.Text(tr("Открытие вклада"), color=ui_color("text")),
-            content=ft.Column([prod_dd, sum_tf], spacing=8, tight=True),
+            content=ft.Container(
+                content=ft.Column(
+                    [prod_dd, sum_tf],
+                    spacing=8,
+                    tight=True,
+                ),
+                width=340,
+            ),
             actions=[
-                ft.TextButton(tr("Отмена"), on_click=cancel),
-                ft.ElevatedButton(tr("Открыть"), on_click=ok),
+                ft.TextButton(tr("Отмена"), on_click=close_dialog),
+                ft.Button(tr("Открыть"), on_click=ok),
             ],
             bgcolor=ui_color("surface"),
         )
-        page.dialog.open = True
+        if dlg not in page.overlay:
+            page.overlay.append(dlg)
+        dlg.open = True
         page.update()
-
     def save_profile(e=None):
         u = state["user"]
         if not u:
@@ -3562,10 +3565,9 @@ def main(page: ft.Page):
             content=ft.Column(
                 [
                     ft.Text(tr("Виджет конвертации валют"), weight="bold"),
-                    ft.TextButton(tr("Обновить курсы"), on_click=update_rates),
                     conv_amount,
                     ft.Row([conv_from, conv_to], spacing=8, wrap=False),
-                    ft.ElevatedButton(tr("Конвертировать"), icon=ft.Icons.CURRENCY_EXCHANGE, on_click=do_convert),
+                    ft.Button(tr("Конвертировать"), icon=ft.Icons.CURRENCY_EXCHANGE, on_click=do_convert),
                     conv_result,
                 ],
                 spacing=10,
@@ -3579,7 +3581,7 @@ def main(page: ft.Page):
         deposits_card = ft.Container(
             content=ft.Column(
                 [
-                    ft.Row([ft.Text(tr("Доступные вклады"), weight="bold"), ft.ElevatedButton(tr("Открыть вклад"), icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog)]),
+                    ft.Row([ft.Text(tr("Доступные вклады"), weight="bold"), ft.Button(tr("Открыть вклад"), icon=ft.Icons.ADD_CIRCLE_OUTLINE, on_click=open_deposit_dialog)]),
                     ft.Text(tr("Список продуктов со ставкой, сроком и минимальной суммой открытия."), size=12, color=ui_color("muted")),
                     ft.Column(
                         [
@@ -3643,7 +3645,7 @@ def main(page: ft.Page):
                 ft.Row([history_type_dd, history_min_amount_tf, history_max_amount_tf], wrap=True, spacing=8),
                 ft.Row(
                     [
-                        ft.ElevatedButton(tr("Применить"), icon=ft.Icons.FILTER_ALT, on_click=apply_history_filters),
+                        ft.Button(tr("Применить"), icon=ft.Icons.FILTER_ALT, on_click=apply_history_filters),
                         ft.TextButton(tr("Сбросить"), on_click=reset_history_filters),
                     ],
                     spacing=8,
@@ -3766,7 +3768,6 @@ def main(page: ft.Page):
         sync_theme_controls()
         sync_language_controls()
         page.controls.clear()
-
         top_row = ft.Row(
             [
                 ft.Column(
@@ -3780,9 +3781,23 @@ def main(page: ft.Page):
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         )
-
-        app_content = ft.Column([top_row, main_container, nav], expand=True, spacing=6)
-        page.add(mobile_shell(app_content, shell_bg=ui_color("shell_surface"), outer_bg=ui_color("shell_outer"), shell_border=ui_color("shell_border")))
+        nav_wrap = ft.Container(
+            content=nav,
+            border_radius=28,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            bgcolor=ui_color("nav_bg"),
+            border=ft.Border.all(1, ui_color("border")),
+            margin=ft.Margin.only(left=10, top=4, right=10, bottom=8),
+        )
+        app_content = ft.Column([top_row, main_container, nav_wrap], expand=True, spacing=6)
+        page.add(
+            mobile_shell(
+                app_content,
+                shell_bg=ui_color("shell_surface"),
+                outer_bg=ui_color("shell_outer"),
+                shell_border=ui_color("shell_border"),
+            )
+        )
         nav.selected_index = selected_index
         on_nav_change(None)
         page.update()
