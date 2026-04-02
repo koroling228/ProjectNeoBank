@@ -1260,6 +1260,12 @@ def main(page: ft.Page):
         "Номер основного счета": "Primary account number",
         "Не указан": "Not specified",
         "История операций": "Transaction history",
+        "Войдите в аккаунт для просмотра истории": "Log in to view history",
+        "История операций доступна только авторизованным пользователям.": "Transaction history is available only to authorized users.",
+        "Последние операции": "Recent transactions",
+        "Показать все": "Show all",
+        "Недавние транзакции по вашему счету.": "Recent transactions on your account.",
+        "Операций пока нет": "No transactions yet",
         "Полная лента переводов, пополнений, расходов и операций по вкладам.": "Complete feed of transfers, top-ups, expenses, and deposit transactions.",
         "Применить": "Apply",
         "Сбросить": "Reset",
@@ -1932,12 +1938,7 @@ def main(page: ft.Page):
             return
 
         try:
-            root = tk.Tk()
-            root.withdraw()
-            root.clipboard_clear()
-            root.clipboard_append(text)
-            root.update()
-            root.destroy()
+            page.set_clipboard(text)
             toast(ok_text)
         except Exception:
             toast("Не удалось скопировать")
@@ -2070,7 +2071,7 @@ def main(page: ft.Page):
     auth_stack = ft.Container(expand=True)
 
     deposits_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
-    history_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=8, expand=True)
+    history_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=8)
     assistant_state = {"path": [], "selected": None, "query": ""}
 
     conv_amount = ft.TextField(
@@ -2147,7 +2148,9 @@ def main(page: ft.Page):
         ],
     )
 
-    main_container = ft.Container(content=ft.Text(""), expand=True)
+    main_container = ft.Container(
+        content=ft.Text(""), expand=True, bgcolor=ui_color("surface")
+    )
 
     nav = ft.NavigationBar(
         height=64,
@@ -2365,8 +2368,6 @@ def main(page: ft.Page):
     def build_history_item(op: Dict[str, Any]):
         op_type = op.get("type", "")
         amount = safe_float(op.get("amount"), 0.0)
-        title = tr_history_text(op.get("title") or human_op_type(op_type))
-        details = tr_history_text(op.get("details") or "")
         date_str = op.get("date", "")
         currency = op.get("currency", "RUB")
 
@@ -2381,10 +2382,6 @@ def main(page: ft.Page):
         else:
             amount_color = ui_color("text")
 
-        subtitle_parts = [tr(human_op_type(op_type)), date_str]
-        if details:
-            subtitle_parts.append(details)
-
         return ft.Card(
             content=ft.Container(
                 content=ft.Column(
@@ -2393,9 +2390,13 @@ def main(page: ft.Page):
                             [
                                 ft.Column(
                                     [
-                                        ft.Text(title, weight="bold", size=14),
                                         ft.Text(
-                                            " • ".join(subtitle_parts),
+                                            tr(human_op_type(op_type)),
+                                            weight="bold",
+                                            size=14,
+                                        ),
+                                        ft.Text(
+                                            date_str,
                                             size=11,
                                             color=ui_color("muted"),
                                         ),
@@ -4608,43 +4609,94 @@ def main(page: ft.Page):
         )
 
     def build_history_view():
-        return ft.Column(
-            [
-                ft.Text(tr("История операций"), size=20, weight="bold"),
-                ft.Text(
-                    tr(
-                        "Полная лента переводов, пополнений, расходов и операций по вкладам."
-                    ),
-                    color=ui_color("muted"),
-                ),
-                ft.Divider(),
-                history_search_tf,
-                ft.Row(
-                    [history_date_from_tf, history_date_to_tf], wrap=True, spacing=8
-                ),
-                ft.Row(
-                    [history_type_dd, history_min_amount_tf, history_max_amount_tf],
-                    wrap=True,
-                    spacing=8,
-                ),
-                ft.Row(
+        u = state.get("user")
+        if not u:
+            return ft.Container(
+                content=ft.Column(
                     [
-                        ft.Button(
-                            tr("Применить"),
-                            icon=ft.Icons.FILTER_ALT,
-                            on_click=apply_history_filters,
+                        ft.Text(tr("История операций"), size=20, weight="bold"),
+                        ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Icon(
+                                        ft.Icons.LOGIN,
+                                        size=48,
+                                        color=ui_color("subtle"),
+                                    ),
+                                    ft.Text(
+                                        tr("Войдите в аккаунт для просмотра истории"),
+                                        weight="bold",
+                                        text_align=ft.TextAlign.CENTER,
+                                    ),
+                                    ft.Text(
+                                        tr(
+                                            "История операций доступна только авторизованным пользователям."
+                                        ),
+                                        size=12,
+                                        color=ui_color("muted"),
+                                        text_align=ft.TextAlign.CENTER,
+                                    ),
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=12,
+                            ),
+                            padding=40,
+                            alignment=ft.alignment.Alignment(0, 0),
+                            expand=True,
                         ),
-                        ft.TextButton(tr("Сбросить"), on_click=reset_history_filters),
                     ],
-                    spacing=8,
+                    spacing=10,
+                    expand=True,
                 ),
-                history_summary_text,
-                ft.Divider(),
-                history_column,
-            ],
-            spacing=10,
+                bgcolor=ui_color("surface"),
+                expand=True,
+            )
+
+        return ft.Container(
+            content=ft.Column(
+                [
+                    ft.Text(tr("История операций"), size=20, weight="bold"),
+                    ft.Text(
+                        tr(
+                            "Полная лента переводов, пополнений, расходов и операций по вкладам."
+                        ),
+                        color=ui_color("muted"),
+                    ),
+                    ft.Divider(),
+                    history_search_tf,
+                    ft.Row(
+                        [history_date_from_tf, history_date_to_tf], wrap=True, spacing=8
+                    ),
+                    ft.Row(
+                        [history_type_dd, history_min_amount_tf, history_max_amount_tf],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        [
+                            ft.Button(
+                                tr("Применить"),
+                                icon=ft.Icons.FILTER_ALT,
+                                on_click=apply_history_filters,
+                            ),
+                            ft.TextButton(
+                                tr("Сбросить"), on_click=reset_history_filters
+                            ),
+                        ],
+                        spacing=8,
+                    ),
+                    history_summary_text,
+                    ft.Divider(),
+                    ft.Container(
+                        content=history_column, bgcolor=ui_color("surface"), expand=True
+                    ),
+                ],
+                spacing=10,
+                expand=True,
+                scroll=ft.ScrollMode.AUTO,
+            ),
+            bgcolor=ui_color("surface"),
             expand=True,
-            scroll=ft.ScrollMode.AUTO,
         )
 
     def build_profile_view():
