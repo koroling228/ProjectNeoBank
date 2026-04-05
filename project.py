@@ -1167,7 +1167,6 @@ def mobile_shell(
         padding=12,
         expand=True,  # Make responsive instead of fixed size
         border=shell_border,
-        shadow=ft.BoxShadow(blur_radius=24),
     )
     return ft.Container(
         content=ft.Row(
@@ -2071,7 +2070,7 @@ def main(page: ft.Page):
     auth_stack = ft.Container(expand=True)
 
     deposits_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
-    history_column = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=8)
+    history_column = ft.ListView(expand=True, spacing=8, padding=0)
     assistant_state = {"path": [], "selected": None, "query": ""}
 
     conv_amount = ft.TextField(
@@ -2148,13 +2147,13 @@ def main(page: ft.Page):
         ],
     )
 
-    main_container = ft.Container(
-        content=ft.Text(""), expand=True, bgcolor=ui_color("surface")
-    )
+    main_container = ft.Container(content=ft.Text(""), expand=True)
 
     nav = ft.NavigationBar(
         height=64,
         label_behavior=ft.NavigationBarLabelBehavior.ALWAYS_SHOW,
+        elevation=0,
+        shadow_color=ft.Colors.TRANSPARENT,
         destinations=[
             ft.NavigationBarDestination(icon=ft.Icons.HOME, label=tr("Главная")),
             ft.NavigationBarDestination(icon=ft.Icons.SMART_TOY, label=tr("Помощник")),
@@ -2980,7 +2979,7 @@ def main(page: ft.Page):
                     border_radius=22,
                     bgcolor=ui_color("surface"),
                     border=ft.Border.all(1, ui_color("border")),
-                    shadow=ft.BoxShadow(blur_radius=18),
+                    clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                 ),
             ],
             spacing=8,
@@ -4652,50 +4651,41 @@ def main(page: ft.Page):
                 expand=True,
             )
 
-        return ft.Container(
-            content=ft.Column(
-                [
-                    ft.Text(tr("История операций"), size=20, weight="bold"),
-                    ft.Text(
-                        tr(
-                            "Полная лента переводов, пополнений, расходов и операций по вкладам."
+        return ft.Column(
+            [
+                ft.Text(tr("История операций"), size=20, weight="bold"),
+                ft.Text(
+                    tr(
+                        "Полная лента переводов, пополнений, расходов и операций по вкладам."
+                    ),
+                    color=ui_color("muted"),
+                ),
+                ft.Divider(),
+                history_search_tf,
+                ft.Row(
+                    [history_date_from_tf, history_date_to_tf], wrap=True, spacing=8
+                ),
+                ft.Row(
+                    [history_type_dd, history_min_amount_tf, history_max_amount_tf],
+                    wrap=True,
+                    spacing=8,
+                ),
+                ft.Row(
+                    [
+                        ft.Button(
+                            tr("Применить"),
+                            icon=ft.Icons.FILTER_ALT,
+                            on_click=apply_history_filters,
                         ),
-                        color=ui_color("muted"),
-                    ),
-                    ft.Divider(),
-                    history_search_tf,
-                    ft.Row(
-                        [history_date_from_tf, history_date_to_tf], wrap=True, spacing=8
-                    ),
-                    ft.Row(
-                        [history_type_dd, history_min_amount_tf, history_max_amount_tf],
-                        wrap=True,
-                        spacing=8,
-                    ),
-                    ft.Row(
-                        [
-                            ft.Button(
-                                tr("Применить"),
-                                icon=ft.Icons.FILTER_ALT,
-                                on_click=apply_history_filters,
-                            ),
-                            ft.TextButton(
-                                tr("Сбросить"), on_click=reset_history_filters
-                            ),
-                        ],
-                        spacing=8,
-                    ),
-                    history_summary_text,
-                    ft.Divider(),
-                    ft.Container(
-                        content=history_column, bgcolor=ui_color("surface"), expand=True
-                    ),
-                ],
-                spacing=10,
-                expand=True,
-                scroll=ft.ScrollMode.AUTO,
-            ),
-            bgcolor=ui_color("surface"),
+                        ft.TextButton(tr("Сбросить"), on_click=reset_history_filters),
+                    ],
+                    spacing=8,
+                ),
+                history_summary_text,
+                ft.Divider(),
+                history_column,
+            ],
+            spacing=10,
             expand=True,
         )
 
