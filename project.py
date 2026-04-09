@@ -2,7 +2,7 @@
 # NeoBank — объединённая версия с SQLite, мобильным UI,
 # рабочей аутентификацией, полным цифровым помощником,
 # открытием вкладов, профилем, темой и улучшенной историей операций
-# Совместимо с flet 0.81.0
+# Совместимо с flet 0.80.5
 # Требования: pip install flet requests matplotlib
 # Оптимизировано для мобильных устройств: адаптивный layout, touch-friendly кнопки, responsive design
 
@@ -2096,13 +2096,22 @@ def main(page: ft.Page):
         label="Поиск",
         hint_text="Например: зарплата, вклад, перевод, такси",
         prefix_icon=ft.Icons.SEARCH,
+        text_size=14,
         dense=True,
     )
     history_date_from_tf = ft.TextField(
-        label="Дата от", hint_text="YYYY-MM-DD", expand=True, dense=True
+        label="Дата от",
+        hint_text="YYYY-MM-DD",
+        expand=True,
+        dense=True,
+        keyboard_type=ft.KeyboardType.DATETIME,
     )
     history_date_to_tf = ft.TextField(
-        label="Дата до", hint_text="YYYY-MM-DD", expand=True, dense=True
+        label="Дата до",
+        hint_text="YYYY-MM-DD",
+        expand=True,
+        dense=True,
+        keyboard_type=ft.KeyboardType.DATETIME,
     )
     history_type_dd = ft.Dropdown(
         label="Тип операции",
@@ -2118,12 +2127,20 @@ def main(page: ft.Page):
         ],
     )
     history_min_amount_tf = ft.TextField(
-        label="Сумма от", hint_text="0", expand=True, dense=True
+        label="Сумма от",
+        hint_text="0",
+        expand=True,
+        dense=True,
+        keyboard_type=ft.KeyboardType.NUMBER,
     )
     history_max_amount_tf = ft.TextField(
-        label="Сумма до", hint_text="10000", expand=True, dense=True
+        label="Сумма до",
+        hint_text="10000",
+        expand=True,
+        dense=True,
+        keyboard_type=ft.KeyboardType.NUMBER,
     )
-    history_summary_text = ft.Text("", color=ui_color("muted"), size=12)
+    history_summary_text = ft.Text("", color=ui_color("muted"), size=12, max_lines=3)
 
     profile_name_tf = ft.TextField(label="ФИО", expand=True, read_only=True)
     profile_email_tf = ft.TextField(label="Email", expand=True, read_only=True)
@@ -2364,22 +2381,51 @@ def main(page: ft.Page):
         profile_lang_dd.disabled = False
         profile_theme_dd.disabled = False
 
+    def history_op_direction(op_type: str) -> int:
+        incoming = {"income", "deposit_close", "deposit_interest"}
+        outgoing = {"expense", "transfer", "deposit_open"}
+        if op_type in incoming:
+            return 1
+        if op_type in outgoing:
+            return -1
+        return 0
+
+    def history_op_icon(op_type: str):
+        icon_map = {
+            "income": ft.Icons.SOUTH_WEST,
+            "expense": ft.Icons.NORTH_EAST,
+            "transfer": ft.Icons.SWAP_HORIZ,
+            "deposit_open": ft.Icons.SAVINGS,
+            "deposit_close": ft.Icons.ACCOUNT_BALANCE_WALLET,
+            "deposit_interest": ft.Icons.PAID,
+        }
+        return icon_map.get(op_type, ft.Icons.RECEIPT_LONG)
+
     def build_history_item(op: Dict[str, Any]):
         op_type = op.get("type", "")
         amount = safe_float(op.get("amount"), 0.0)
         date_str = op.get("date", "")
         currency = op.get("currency", "RUB")
+        title = (op.get("title") or "").strip()
+        details = (op.get("details") or "").strip()
+        direction = history_op_direction(op_type)
+        signed_amount = abs(amount) * direction if direction else amount
 
-        amount_text = f"{amount:,.2f} {currency}"
-        if amount > 0:
+        amount_text = f"{abs(signed_amount):,.2f} {currency}"
+        if signed_amount > 0:
             amount_text = f"+{amount_text}"
+        elif signed_amount < 0:
+            amount_text = f"-{amount_text}"
 
-        if amount > 0:
+        if signed_amount > 0:
             amount_color = ui_color("success_text")
-        elif amount < 0:
+        elif signed_amount < 0:
             amount_color = ui_color("danger_text")
         else:
             amount_color = ui_color("text")
+
+        pretty_date = date_str.replace("T", " ")
+        op_caption = tr(human_op_type(op_type))
 
         return ft.Card(
             content=ft.Container(
@@ -2387,36 +2433,75 @@ def main(page: ft.Page):
                     [
                         ft.Row(
                             [
+                                ft.Container(
+                                    content=ft.Icon(
+                                        history_op_icon(op_type),
+                                        size=18,
+                                        color=ui_color("primary"),
+                                    ),
+                                    width=34,
+                                    height=34,
+                                    border_radius=10,
+                                    alignment=ft.alignment.Alignment(0, 0),
+                                    bgcolor=ui_color("primary_soft"),
+                                ),
                                 ft.Column(
                                     [
+                                        ft.Text(op_caption, weight="bold", size=14),
                                         ft.Text(
-                                            tr(human_op_type(op_type)),
-                                            weight="bold",
-                                            size=14,
+                                            title or op_caption,
+                                            size=12,
+                                            color=ui_color("muted"),
+                                            max_lines=1,
+                                            overflow=ft.TextOverflow.ELLIPSIS,
                                         ),
                                         ft.Text(
-                                            date_str,
+                                            pretty_date,
                                             size=11,
                                             color=ui_color("muted"),
                                         ),
                                     ],
-                                    spacing=4,
+                                    spacing=2,
                                     expand=True,
                                 ),
-                                ft.Text(
-                                    amount_text,
-                                    weight="bold",
-                                    size=14,
-                                    color=amount_color,
+                                ft.Column(
+                                    [
+                                        ft.Text(
+                                            amount_text,
+                                            weight="bold",
+                                            size=14,
+                                            color=amount_color,
+                                            text_align=ft.TextAlign.RIGHT,
+                                        ),
+                                        ft.Text(
+                                            currency,
+                                            size=11,
+                                            color=ui_color("muted"),
+                                            text_align=ft.TextAlign.RIGHT,
+                                        ),
+                                    ],
+                                    spacing=2,
+                                    horizontal_alignment=ft.CrossAxisAlignment.END,
                                 ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             vertical_alignment=ft.CrossAxisAlignment.START,
                         ),
+                        (
+                            ft.Text(
+                                details,
+                                size=11,
+                                color=ui_color("muted"),
+                                max_lines=2,
+                                overflow=ft.TextOverflow.ELLIPSIS,
+                            )
+                            if details
+                            else ft.Container()
+                        ),
                     ],
-                    spacing=4,
+                    spacing=6,
                 ),
-                padding=10,
+                padding=12,
             ),
             elevation=2,
         )
@@ -4609,6 +4694,7 @@ def main(page: ft.Page):
 
     def build_history_view():
         u = state.get("user")
+        compact_layout = (page.width or 390) < 620
         if not u:
             return ft.Container(
                 content=ft.Column(
@@ -4651,6 +4737,64 @@ def main(page: ft.Page):
                 expand=True,
             )
 
+        if compact_layout:
+            history_filters_layout = ft.Column(
+                [
+                    history_search_tf,
+                    history_type_dd,
+                    ft.Row([history_date_from_tf, history_date_to_tf], spacing=8),
+                    ft.Row([history_min_amount_tf, history_max_amount_tf], spacing=8),
+                    ft.Row(
+                        [
+                            ft.Button(
+                                tr("Применить"),
+                                icon=ft.Icons.FILTER_ALT,
+                                on_click=apply_history_filters,
+                                expand=True,
+                            ),
+                            ft.TextButton(
+                                tr("Сбросить"),
+                                on_click=reset_history_filters,
+                            ),
+                        ],
+                        spacing=8,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    ),
+                ],
+                spacing=8,
+            )
+        else:
+            history_filters_layout = ft.Column(
+                [
+                    history_search_tf,
+                    ft.Row(
+                        [history_date_from_tf, history_date_to_tf],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        [history_type_dd, history_min_amount_tf, history_max_amount_tf],
+                        wrap=True,
+                        spacing=8,
+                    ),
+                    ft.Row(
+                        [
+                            ft.Button(
+                                tr("Применить"),
+                                icon=ft.Icons.FILTER_ALT,
+                                on_click=apply_history_filters,
+                            ),
+                            ft.TextButton(
+                                tr("Сбросить"),
+                                on_click=reset_history_filters,
+                            ),
+                        ],
+                        spacing=8,
+                    ),
+                ],
+                spacing=8,
+            )
+
         return ft.Column(
             [
                 ft.Text(tr("История операций"), size=20, weight="bold"),
@@ -4661,25 +4805,12 @@ def main(page: ft.Page):
                     color=ui_color("muted"),
                 ),
                 ft.Divider(),
-                history_search_tf,
-                ft.Row(
-                    [history_date_from_tf, history_date_to_tf], wrap=True, spacing=8
-                ),
-                ft.Row(
-                    [history_type_dd, history_min_amount_tf, history_max_amount_tf],
-                    wrap=True,
-                    spacing=8,
-                ),
-                ft.Row(
-                    [
-                        ft.Button(
-                            tr("Применить"),
-                            icon=ft.Icons.FILTER_ALT,
-                            on_click=apply_history_filters,
-                        ),
-                        ft.TextButton(tr("Сбросить"), on_click=reset_history_filters),
-                    ],
-                    spacing=8,
+                ft.Container(
+                    content=history_filters_layout,
+                    padding=12,
+                    border_radius=14,
+                    bgcolor=ui_color("surface_alt"),
+                    border=ft.Border.all(1, ui_color("border")),
                 ),
                 history_summary_text,
                 ft.Divider(),
