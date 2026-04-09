@@ -2,7 +2,7 @@
 # NeoBank — объединённая версия с SQLite, мобильным UI,
 # рабочей аутентификацией, полным цифровым помощником,
 # открытием вкладов, профилем, темой и улучшенной историей операций
-# Совместимо с flet 0.80.5
+# Совместимо с flet 0.81.0
 # Требования: pip install flet requests matplotlib
 # Оптимизировано для мобильных устройств: адаптивный layout, touch-friendly кнопки, responsive design
 
@@ -4762,6 +4762,7 @@ def main(page: ft.Page):
                     ),
                 ],
                 spacing=8,
+                expand=True,
             )
         else:
             history_filters_layout = ft.Column(
@@ -4793,6 +4794,7 @@ def main(page: ft.Page):
                     ),
                 ],
                 spacing=8,
+                expand=True,
             )
 
         return ft.Column(
@@ -4811,12 +4813,14 @@ def main(page: ft.Page):
                     border_radius=14,
                     bgcolor=ui_color("surface_alt"),
                     border=ft.Border.all(1, ui_color("border")),
+                    expand=True,
                 ),
                 history_summary_text,
                 ft.Divider(),
                 history_column,
             ],
             spacing=10,
+            scroll=ft.ScrollMode.AUTO,
             expand=True,
         )
 
